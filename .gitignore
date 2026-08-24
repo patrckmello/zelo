@@ -1,0 +1,44 @@
+# Segredos e configuracoes locais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Flutter e Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+coverage/
+*.lock
+!pubspec.lock
+
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+*.jks
+*.keystore
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# IDE e sistema operacional
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Evidencias geradas localmente
+artifacts/
+test-results/
+
