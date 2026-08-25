@@ -13,15 +13,18 @@ Estado: concluído em 24/08/2026.
 
 ## M1 - Fundação Flutter
 
-Estado: bloqueado pelo toolchain ausente.
+Estado: em andamento.
 
-- disponibilizar Flutter, Dart, JDK 17 e Android SDK;
-- executar `flutter doctor -v`;
-- gerar aplicativo com CLI oficial;
-- configurar identificador Android provisoriamente como `br.edu.cesuca.zelo`;
-- aplicar lints, Material 3, paleta e tipografia validada;
-- criar página inicial simulada e navegação mínima;
-- executar formatacao, analise e testes.
+- [x] disponibilizar Flutter 3.47.1 e Dart 3.13.1 de forma portátil;
+- [x] executar `flutter doctor -v`;
+- [x] gerar aplicativo com CLI oficial;
+- [x] configurar identificador Android como `br.edu.cesuca.zelo`;
+- [x] aplicar lints, Material 3 e paleta provisoriamente validada;
+- [x] criar página inicial simulada e navegação mínima;
+- [x] executar formatação, análise, testes e build Web;
+- [ ] disponibilizar Android SDK e JDK 17;
+- [ ] validar execução em Android real ou emulador;
+- [ ] adicionar Poppins após receber os arquivos licenciados.
 
 ## M2 - Fluxo manual simulado
 
@@ -29,9 +32,9 @@ Estado: planejado.
 
 - modelo tipado de medicamento;
 - regra testada de situação da validade;
-- lista, cadastro, edicao, detalhes e remocao em memoria;
+- lista, cadastro, edição, detalhes e remoção em memória;
 - estados vazio e erro simulados;
-- resumo da farmácia domestica.
+- resumo da farmácia doméstica.
 
 ## M3 - Backend e persistência
 
@@ -40,7 +43,7 @@ Estado: planejado.
 - FastAPI, configuração e testes;
 - PostgreSQL, SQLAlchemy e Alembic;
 - usuários, autenticação e medicamentos;
-- Docker Compose e instrucoes locais;
+- Docker Compose e instruções locais;
 - integração do aplicativo com a API Zelo.
 
 ## M4 - EcoMed e pontos
@@ -70,12 +73,12 @@ Estado: planejado.
 - testes funcionais e em Android real;
 - medição da API com e sem cache;
 - protocolo e testes de usabilidade;
-- consolidacao de limitacoes e evidências reais;
-- resumo e apresentacao conforme regulamento.
+- consolidação de limitações e evidências reais;
+- resumo e apresentação conforme regulamento.
 
 ## M7 - Evoluções condicionais
 
-Estado: planejado, fora do nucleo.
+Estado: planejado, fora do núcleo.
 
 - mapa embutido;
 - OCR com confirmação humana;

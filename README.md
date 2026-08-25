@@ -24,9 +24,9 @@ project is currently in its initial planning and workspace setup phase.
 
 - **Confirmado:** Flutter/Dart, Android como prioridade, API própria e uso
   autorizado da API EcoMed por meio do backend.
-- **Implementado:** repositório local, estrutura inicial do workspace e
-  documentação de engenharia.
-- **Pendente:** instalação do toolchain Flutter/Android e geração do aplicativo.
+- **Implementado:** repositório, documentação, scaffold Flutter, tema Material 3,
+  página inicial simulada, navegação mínima e testes de widgets.
+- **Pendente:** Android SDK/JDK 17 para executar e validar o aplicativo no Android.
 - **Não iniciado:** backend, banco, autenticação, EcoMed, notificações e OCR.
 
 ## Tecnologias planejadas
@@ -42,7 +42,7 @@ project is currently in its initial planning and workspace setup phase.
 
 ```text
 Zelo/
-|-- mobile/       # Aplicativo Flutter (scaffold pendente)
+|-- mobile/       # Aplicativo Flutter
 |-- backend/      # API própria (implementação futura)
 |-- docs/         # Arquitetura, requisitos, decisões e evidências
 |-- README.md
@@ -82,17 +82,17 @@ logs. O contrato real da API deverá ser inspecionado antes da implementação.
 
 ## Como executar o aplicativo
 
-O scaffold Flutter ainda não foi gerado porque o SDK não está disponível neste
-ambiente. Quando o toolchain estiver validado, a criação planejada é:
+O SDK Flutter portátil está em `.tools/flutter` e não é versionado. Nesta
+máquina, execute pela raiz do repositório:
 
 ```powershell
-flutter create --org br.edu.cesuca --project-name zelo mobile
 cd mobile
-flutter pub get
-flutter run
+..\.tools\flutter\bin\flutter.bat pub get
+..\.tools\flutter\bin\flutter.bat run -d chrome
 ```
 
-O identificador Android provisoriamente proposto é `br.edu.cesuca.zelo`.
+Para usar uma instalação global, substitua o caminho por `flutter`. O
+identificador Android provisório é `br.edu.cesuca.zelo`.
 
 ## Como executar o backend
 
@@ -101,24 +101,23 @@ marco correspondente; não há comandos fictícios de execução nesta versão.
 
 ## Testes
 
-Quando o aplicativo existir:
+Com o SDK portátil:
 
 ```powershell
 cd mobile
-dart format --output=none --set-exit-if-changed .
-flutter analyze
-flutter test
+..\.tools\flutter\bin\dart.bat format --output=none --set-exit-if-changed .
+..\.tools\flutter\bin\flutter.bat analyze
+..\.tools\flutter\bin\flutter.bat test
 ```
 
 O plano completo está em [docs/testing-plan.md](docs/testing-plan.md).
 
 ## Próximos passos
 
-1. Instalar ou disponibilizar Flutter, Android SDK e JDK 17.
-2. Validar o ambiente com `flutter doctor -v`.
-3. Gerar o projeto Flutter pelo CLI oficial.
-4. Implementar tema Material 3, navegação mínima e página inicial simulada.
-5. Executar formatação, análise estática e testes.
+1. Instalar ou disponibilizar Android SDK e JDK 17.
+2. Validar o ambiente Android com `flutter doctor -v`.
+3. Executar a interface inicial em smartphone ou emulador Android.
+4. Implementar o fluxo manual de medicamentos com dados simulados.
+5. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
 
 Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.
-

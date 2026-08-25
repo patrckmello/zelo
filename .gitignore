@@ -38,7 +38,9 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Toolchains portáteis locais
+.tools/
+
 # Evidencias geradas localmente
 artifacts/
 test-results/
-

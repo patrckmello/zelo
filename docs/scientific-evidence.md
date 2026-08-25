@@ -5,30 +5,33 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 
 ## Identificação da versão
 
-- Data: PENDENTE
-- versão ou commit: PENDENTE
-- Ambiente/dispositivo: PENDENTE
-- responsável pela coleta: PENDENTE
+- Data: 24/08/2026
+- Versão ou commit: alterações posteriores ao commit `4a0f8e1`, ainda não commitadas
+- Ambiente/dispositivo: Windows 11 Education, Flutter 3.47.1 e Dart 3.13.1
+- Responsável pela coleta: execução automatizada local do projeto
 
 ## Requisitos validados
 
-| Requisito | método | Resultado | evidência |
+| Requisito | Método | Resultado | Evidência |
 |---|---|---|---|
-| PENDENTE | PENDENTE | PENDENTE | PENDENTE |
+| Base visual inicial | `flutter analyze` | Sem problemas | Saída local em 24/08/2026 |
+| Página inicial | Teste de widget | Aprovado | 1 teste automatizado |
+| Navegação para medicamentos | Teste de widget | Aprovado | 1 teste automatizado |
+| Compilação Web | `flutter build web` | Aprovada | Artefato local em `mobile/build/web` |
 
 ## Desempenho da API
 
-| Cenario | Amostras | Mediana | P95 | observações |
+| Cenário | Amostras | Mediana | P95 | Observações |
 |---|---:|---:|---:|---|
 | Cache frio | PENDENTE | PENDENTE | PENDENTE | PENDENTE |
 | Cache quente | PENDENTE | PENDENTE | PENDENTE | PENDENTE |
 
 ## Cobertura geográfica observada
 
-- região e coordenadas de teste: PENDENTE
+- Região e coordenadas de teste: PENDENTE
 - Raio: PENDENTE
 - Pontos retornados: PENDENTE
-- farmácias `logmed-*`: PENDENTE
+- Farmácias `logmed-*`: PENDENTE
 - Unidades públicas: PENDENTE
 - Data da consulta: PENDENTE
 
@@ -44,11 +47,12 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 
 ## OCR
 
-Fora do nucleo inicial. Caso seja implementado, registrar conjunto de imagens,
-condicoes, campos esperados, acertos, erros e correcoes manuais, respeitando
-privacidade e sem armazenar dados pessoais desnecessarios.
+Fora do núcleo inicial. Caso seja implementado, registrar conjunto de imagens,
+condições, campos esperados, acertos, erros e correções manuais, respeitando
+privacidade e sem armazenar dados pessoais desnecessários.
 
 ## Limitações
 
-- implementação ainda não iniciada nesta versão.
-- não existem resultados funcionais, de desempenho ou usabilidade coletados.
+- Android SDK indisponível; execução Android ainda não foi validada.
+- A página inicial usa dados simulados e não representa persistência real.
+- Não existem resultados de desempenho da API ou de usabilidade coletados.

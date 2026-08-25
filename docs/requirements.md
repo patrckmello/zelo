@@ -53,6 +53,6 @@ nenhum esta implementado em código.
 
 ## Critério do fluxo vertical inicial
 
-Com dados simulados, o usuário deve visualizar o resumo da farmácia domestica,
+Com dados simulados, o usuário deve visualizar o resumo da farmácia doméstica,
 abrir a lista de medicamentos e acessar uma tela de cadastro manual. A regra de
 validade deve possuir testes determinísticos antes da persistência real.

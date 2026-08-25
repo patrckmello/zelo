@@ -7,7 +7,7 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 
 - Estado: aceita
 - decisão: manter `mobile`, `backend` e `docs` no mesmo repositório.
-- Motivo: facilita coordenação, rastreabilidade e apresentacao para uma equipe
+- Motivo: facilita coordenação, rastreabilidade e apresentação para uma equipe
   acadêmica de duas pessoas.
 
 ## D002 - Aplicativo Flutter com Android prioritário
@@ -26,7 +26,7 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 ## D004 - Fluxo manual antes de OCR
 
 - Estado: aceita
-- decisão: OCR permanece fora do nucleo inicial.
+- decisão: OCR permanece fora do núcleo inicial.
 - Motivo: preservar cadastro, classificação, descarte e testes confiáveis antes
   de introduzir reconhecimento sujeito a erro.
 
