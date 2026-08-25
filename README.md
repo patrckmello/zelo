@@ -17,18 +17,22 @@ Zelo is an academic mobile application project from CESUCA focused on helping
 people organize medicines stored at home, monitor expiration dates, and find
 appropriate collection points for responsible disposal. The Android-first MVP
 will use Flutter and Dart, supported by a dedicated backend that protects the
-EcoMed API key and provides normalized, cached collection-point data. The
-project is currently in its initial planning and workspace setup phase.
+EcoMed API key and provides normalized, cached collection-point data. The repository now includes an implemented and automated-tested in-memory
+medication management vertical slice. Persistence, authentication, EcoMed
+integration, onboarding, and Android device validation remain planned.
 
 ## Estado atual
 
 - **Confirmado:** Flutter/Dart, Android como prioridade, API própria e uso
   autorizado da API EcoMed por meio do backend.
 - **Implementado:** repositório, documentação, scaffold Flutter, tema Material 3,
-  página inicial simulada, navegação mínima e testes de widgets.
+  resumo dinâmico da farmácia doméstica e fluxo manual de medicamentos em
+  memória: listagem, cadastro, edição, detalhes e remoção.
+- **Verificado:** formatação, análise estática, 12 testes automatizados e build
+  Web nos commits `76f5abd` e `33ec173`.
 - **Pendente:** Android SDK/JDK 17 para executar e validar o aplicativo no Android.
-- **Planejado:** splash, onboarding, autenticação, fluxo manual de medicamentos,
-  backend, banco, EcoMed e notificações.
+- **Planejado:** splash, onboarding, autenticação, persistência, backend, banco,
+  EcoMed e notificações.
 - **Fora do núcleo inicial:** OCR e mapa embutido.
 
 ## Fluxo inicial planejado
@@ -137,7 +141,9 @@ cd mobile
 ..\.tools\flutter\bin\flutter.bat test
 ```
 
-O plano completo está em [docs/testing-plan.md](docs/testing-plan.md).
+O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A versão
+atual possui 12 testes automatizados. Os dados dos medicamentos permanecem
+somente em memória e são reiniciados quando o aplicativo é fechado.
 
 ## Próximos passos
 
@@ -145,8 +151,8 @@ O plano completo está em [docs/testing-plan.md](docs/testing-plan.md).
 2. Validar o ambiente Android com `flutter doctor -v`.
 3. Desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha.
 4. Implementar o fluxo inicial e sua navegação com estados simulados.
-5. Implementar o fluxo manual de medicamentos com dados simulados.
-6. Iniciar backend, persistência e autenticação real.
+5. Iniciar backend, persistência e autenticação real.
+6. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras já testadas.
 7. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
 
 Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.

@@ -6,7 +6,8 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 ## Identificação da versão
 
 - Data: 24/08/2026
-- Versão ou commit validado: `4650efd`
+- Funcionalidade validada: fluxo manual de medicamentos em memória
+- Commits validados: `76f5abd` e `33ec173`
 - Ambiente/dispositivo: Windows 11 Education, Flutter 3.47.1 e Dart 3.13.1
 - Responsável pela coleta: execução automatizada local do projeto
 
@@ -14,13 +15,18 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 
 | Requisito | Método | Resultado | Evidência |
 |---|---|---|---|
-| Base visual inicial | `flutter analyze` | Sem problemas | Saída local em 24/08/2026 |
-| Página inicial | Teste de widget | Aprovado | 1 teste automatizado |
-| Navegação para medicamentos | Teste de widget | Aprovado | 1 teste automatizado |
+| Base visual e qualidade estática | `dart format` e `flutter analyze` | Aprovado, sem problemas | Execução local em 24/08/2026 |
+| RF02 - cadastro manual | Teste de widget com validação de formulário | Aprovado | Suíte do commit `33ec173` |
+| RF03 - listagem e resumo | Testes de widget e do armazenamento em memória | Aprovado | Suíte do commit `33ec173` |
+| RF04 - edição e remoção | Teste de widget com confirmação | Aprovado | Suíte do commit `33ec173` |
+| RF05 - situação da validade | Testes unitários de datas-limite | Aprovado | Suíte do commit `33ec173` |
+| Estado vazio e erro simulado | Testes de widget | Aprovado | Suíte do commit `33ec173` |
+| Suíte automatizada completa | `flutter test` | 12 testes aprovados | Execução local em 24/08/2026 |
 | Compilação Web | `flutter build web` | Aprovada | Artefato local em `mobile/build/web` |
 
-Splash, onboarding e autenticação foram adicionados ao planejamento, mas ainda
-não possuem evidência de implementação ou validação.
+As regras de validade verificadas foram: data anterior como vencida; dia da
+validade ainda dentro da janela; limite de 30 dias incluído; acima de 30 dias
+como válido; e suporte interno a uma janela configurável.
 
 ## Desempenho da API
 
@@ -57,7 +63,8 @@ privacidade e sem armazenar dados pessoais desnecessários.
 
 ## Limitações
 
+- O armazenamento é somente em memória e volta aos dados iniciais ao reiniciar.
 - Android SDK indisponível; execução Android ainda não foi validada.
-- A página inicial usa dados simulados e não representa persistência real.
 - Splash, onboarding e autenticação ainda estão apenas planejados.
+- Backend, persistência e integração EcoMed ainda não foram implementados.
 - Não existem resultados de desempenho da API ou de usabilidade coletados.

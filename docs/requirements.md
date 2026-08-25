@@ -7,19 +7,19 @@
 - **Planejado:** pertence a um marco futuro.
 - **Pendente:** depende de decisão ou insumo.
 
-A fundação visual e a navegação mínima já existem. Os requisitos funcionais
-abaixo permanecem planejados enquanto não houver implementação e validação
-específicas.
+A fundação visual, a navegação mínima e o fluxo manual de medicamentos em
+memória já existem. Cada requisito abaixo registra separadamente o estado
+verificado nesta versão.
 
 ## Funcionais do MVP
 
 | ID | Requisito | Estado |
 |---|---|---|
 | RF01 | Cadastrar conta com nome, e-mail e senha | Planejado |
-| RF02 | Cadastrar medicamento com nome, validade, quantidade e observações | Planejado |
-| RF03 | Listar medicamentos | Planejado |
-| RF04 | Editar e remover medicamentos | Planejado |
-| RF05 | Classificar como válido, próximo do vencimento ou vencido | Planejado |
+| RF02 | Cadastrar medicamento com nome, validade, quantidade e observações | Implementado em memória |
+| RF03 | Listar medicamentos | Implementado em memória |
+| RF04 | Editar e remover medicamentos | Implementado em memória |
+| RF05 | Classificar como válido, próximo do vencimento ou vencido | Implementado e testado |
 | RF06 | Notificar proximidade do vencimento | Planejado |
 | RF07 | Consultar pontos próximos por meio da API Zelo | Planejado |
 | RF08 | Exibir pontos em lista e posteriormente em mapa | Planejado |
@@ -77,9 +77,18 @@ específicas.
 - iOS como prioridade;
 - OCR antes da estabilidade do fluxo manual.
 
-## Critério do fluxo vertical inicial
+## Fluxo vertical de medicamentos validado
 
-Com dados simulados, o usuário deve concluir o fluxo de entrada, visualizar o
-resumo da farmácia doméstica, abrir a lista de medicamentos e acessar uma tela
-de cadastro manual. A regra de validade deve possuir testes determinísticos
-antes da persistência real.
+Com dados em memória, o usuário pode visualizar o resumo da farmácia doméstica,
+abrir a lista ordenada por validade, cadastrar, editar, detalhar e remover um
+medicamento. Também foram validados estados vazio e erro simulado.
+
+A regra usa datas civis, sem horário: uma validade anterior à data de referência
+é vencida; de hoje até 30 dias, inclusive, está próxima do vencimento; acima de
+30 dias está válida. O dia da validade ainda não é considerado vencido.
+
+## Critério do fluxo de entrada planejado
+
+Splash, onboarding e autenticação permanecem planejados. Quando implementados,
+o usuário deverá concluir ou pular o onboarding, autenticar-se e chegar à página
+inicial sem permissões solicitadas antecipadamente.
