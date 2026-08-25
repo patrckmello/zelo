@@ -2,6 +2,12 @@
 
 Estados: **concluído**, **em andamento**, **planejado** e **bloqueado**.
 
+## Regra de conclusão
+
+Uma tarefa que altera código, escopo, requisito, arquitetura, integração ou
+teste só pode ser marcada como concluída quando a documentação relacionada
+também estiver atualizada. Consulte AGENTS.md.
+
 ## M0 - Diagnóstico e planejamento
 
 Estado: concluído em 24/08/2026.
@@ -16,9 +22,9 @@ Estado: concluído em 24/08/2026.
 Estado: em andamento.
 
 - [x] disponibilizar Flutter 3.47.1 e Dart 3.13.1 de forma portátil;
-- [x] executar `flutter doctor -v`;
+- [x] executar flutter doctor -v;
 - [x] gerar aplicativo com CLI oficial;
-- [x] configurar identificador Android como `br.edu.cesuca.zelo`;
+- [x] configurar identificador Android como br.edu.cesuca.zelo;
 - [x] aplicar lints, Material 3 e paleta provisoriamente validada;
 - [x] criar página inicial simulada e navegação mínima;
 - [x] executar formatação, análise, testes e build Web;
@@ -26,7 +32,25 @@ Estado: em andamento.
 - [ ] validar execução em Android real ou emulador;
 - [ ] adicionar Poppins após receber os arquivos licenciados.
 
-## M2 - Fluxo manual simulado
+## M2 - Experiência inicial e autenticação
+
+Estado: planejado.
+
+- desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha;
+- criar splash nativa estática com fundo monocromático e logo;
+- criar animação curta da logo após a inicialização do Flutter;
+- respeitar configuração de redução de movimento;
+- criar onboarding de três páginas com opção de pular;
+- persistir a conclusão do onboarding no dispositivo;
+- criar interfaces de login, cadastro e recuperação de senha;
+- restaurar sessão válida e disponibilizar logout;
+- preparar credencial de demonstração para a Mostra;
+- testar primeiro acesso, retorno ao aplicativo e rotas autenticadas.
+
+A interface poderá começar com estado simulado. Autenticação real, armazenamento
+seguro de tokens e recuperação de senha serão concluídos junto ao backend.
+
+## M3 - Fluxo manual simulado
 
 Estado: planejado.
 
@@ -36,17 +60,19 @@ Estado: planejado.
 - estados vazio e erro simulados;
 - resumo da farmácia doméstica.
 
-## M3 - Backend e persistência
+## M4 - Backend e persistência
 
 Estado: planejado.
 
 - FastAPI, configuração e testes;
 - PostgreSQL, SQLAlchemy e Alembic;
-- usuários, autenticação e medicamentos;
+- usuários, autenticação, sessão e medicamentos;
+- armazenamento de senha com hash apropriado;
+- fluxo de recuperação de senha;
 - Docker Compose e instruções locais;
 - integração do aplicativo com a API Zelo.
 
-## M4 - EcoMed e pontos
+## M5 - EcoMed e pontos
 
 Estado: bloqueado pela documentação técnica e exemplos reais.
 
@@ -54,10 +80,10 @@ Estado: bloqueado pela documentação técnica e exemplos reais.
 - implementar cliente somente no backend;
 - cache geográfico, normalização e tratamento de limite;
 - lista e detalhes de pontos;
-- destaque `logmed-*`, aviso para unidades públicas e atribuição;
+- destaque logmed-*, aviso para unidades públicas e atribuição;
 - abertura de rota externa.
 
-## M5 - Descartes e notificações
+## M6 - Descartes e notificações
 
 Estado: planejado.
 
@@ -66,7 +92,7 @@ Estado: planejado.
 - configuração e notificações locais de validade;
 - testes de permissões e agendamento.
 
-## M6 - Validação e Mostra Científica
+## M7 - Validação e Mostra Científica
 
 Estado: planejado.
 
@@ -76,7 +102,7 @@ Estado: planejado.
 - consolidação de limitações e evidências reais;
 - resumo e apresentação conforme regulamento.
 
-## M7 - Evoluções condicionais
+## M8 - Evoluções condicionais
 
 Estado: planejado, fora do núcleo.
 

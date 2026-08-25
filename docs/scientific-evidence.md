@@ -6,7 +6,7 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 ## Identificação da versão
 
 - Data: 24/08/2026
-- Versão ou commit: alterações posteriores ao commit `4a0f8e1`, ainda não commitadas
+- Versão ou commit validado: `4650efd`
 - Ambiente/dispositivo: Windows 11 Education, Flutter 3.47.1 e Dart 3.13.1
 - Responsável pela coleta: execução automatizada local do projeto
 
@@ -18,6 +18,9 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 | Página inicial | Teste de widget | Aprovado | 1 teste automatizado |
 | Navegação para medicamentos | Teste de widget | Aprovado | 1 teste automatizado |
 | Compilação Web | `flutter build web` | Aprovada | Artefato local em `mobile/build/web` |
+
+Splash, onboarding e autenticação foram adicionados ao planejamento, mas ainda
+não possuem evidência de implementação ou validação.
 
 ## Desempenho da API
 
@@ -39,6 +42,7 @@ como `PENDENTE`; resultados esperados não serão apresentados como observados.
 
 - Protocolo e consentimento definidos: PENDENTE
 - Quantidade de participantes: PENDENTE
+- Tempo para concluir o primeiro acesso: PENDENTE
 - Tempo para cadastrar medicamento: PENDENTE
 - Tempo para localizar ponto: PENDENTE
 - Taxa de conclusão: PENDENTE
@@ -55,4 +59,5 @@ privacidade e sem armazenar dados pessoais desnecessários.
 
 - Android SDK indisponível; execução Android ainda não foi validada.
 - A página inicial usa dados simulados e não representa persistência real.
+- Splash, onboarding e autenticação ainda estão apenas planejados.
 - Não existem resultados de desempenho da API ou de usabilidade coletados.

@@ -27,7 +27,26 @@ project is currently in its initial planning and workspace setup phase.
 - **Implementado:** repositório, documentação, scaffold Flutter, tema Material 3,
   página inicial simulada, navegação mínima e testes de widgets.
 - **Pendente:** Android SDK/JDK 17 para executar e validar o aplicativo no Android.
-- **Não iniciado:** backend, banco, autenticação, EcoMed, notificações e OCR.
+- **Planejado:** splash, onboarding, autenticação, fluxo manual de medicamentos,
+  backend, banco, EcoMed e notificações.
+- **Fora do núcleo inicial:** OCR e mapa embutido.
+
+## Fluxo inicial planejado
+
+~~~text
+Splash nativa estática
+→ animação curta da marca
+→ verificar primeiro acesso
+→ onboarding, quando necessário
+→ verificar sessão
+→ login ou página inicial
+~~~
+
+A splash usará fundo monocromático e a logo do Zelo. A animação deverá explorar
+o movimento circular da seta de devolução sem atrasar desnecessariamente a
+abertura. O onboarding apresentará organização, prevenção de desperdício e
+descarte responsável. Câmera e localização serão solicitadas somente no
+contexto da funcionalidade que precisar delas.
 
 ## Tecnologias planejadas
 
@@ -45,9 +64,17 @@ Zelo/
 |-- mobile/       # Aplicativo Flutter
 |-- backend/      # API própria (implementação futura)
 |-- docs/         # Arquitetura, requisitos, decisões e evidências
+|-- AGENTS.md     # Regras obrigatórias para agentes
 |-- README.md
 `-- Zelo_Documentacao_Inicial.docx
 ```
+
+## Documentação viva
+
+Código, decisões e documentação devem evoluir juntos. Toda mudança de requisito,
+escopo, arquitetura, integração, teste ou estado de implementação deverá
+atualizar os arquivos relacionados no mesmo ciclo de trabalho. As regras
+obrigatórias estão em [AGENTS.md](AGENTS.md).
 
 ## Pré-requisitos
 
@@ -116,8 +143,10 @@ O plano completo está em [docs/testing-plan.md](docs/testing-plan.md).
 
 1. Instalar ou disponibilizar Android SDK e JDK 17.
 2. Validar o ambiente Android com `flutter doctor -v`.
-3. Executar a interface inicial em smartphone ou emulador Android.
-4. Implementar o fluxo manual de medicamentos com dados simulados.
-5. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
+3. Desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha.
+4. Implementar o fluxo inicial e sua navegação com estados simulados.
+5. Implementar o fluxo manual de medicamentos com dados simulados.
+6. Iniciar backend, persistência e autenticação real.
+7. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
 
 Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.
