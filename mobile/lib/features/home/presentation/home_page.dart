@@ -1,74 +1,95 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/zelo_colors.dart';
+import '../../medications/application/medication_store.dart';
+import '../../medications/domain/medication.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({
+    required this.medicationStore,
+    required this.onAddMedication,
+    required this.onOpenMedications,
+    required this.onOpenDisposal,
+    super.key,
+  });
+
+  final MedicationStore medicationStore;
+  final VoidCallback onAddMedication;
+  final VoidCallback onOpenMedications;
+  final VoidCallback onOpenDisposal;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('Zelo', style: Theme.of(context).textTheme.headlineLarge),
-                const SizedBox(height: 4),
-                Text(
-                  'Cuide. Organize. Descarte certo.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 28),
-                Text(
-                  'Sua farmácia doméstica',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                const _SummaryGrid(),
-                const SizedBox(height: 24),
-                Text(
-                  'Ações rápidas',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => _showPlannedFeature(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Cadastrar medicamento'),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: () => _showPlannedFeature(context),
-                  icon: const Icon(Icons.location_searching),
-                  label: const Text('Encontrar ponto de descarte'),
-                ),
-                const SizedBox(height: 24),
-                const _NoticeCard(),
-              ],
+    return ListenableBuilder(
+      listenable: medicationStore,
+      builder: (context, _) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Zelo',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Cuide. Organize. Descarte certo.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Sua farmácia doméstica',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onOpenMedications,
+                        child: const Text('Ver todos'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _SummaryGrid(store: medicationStore),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Ações rápidas',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: onAddMedication,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Cadastrar medicamento'),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: onOpenDisposal,
+                    icon: const Icon(Icons.location_searching),
+                    label: const Text('Encontrar ponto de descarte'),
+                  ),
+                  const SizedBox(height: 24),
+                  const _NoticeCard(),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-
-  void _showPlannedFeature(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Funcionalidade planejada para o próximo marco.'),
-        ),
-      );
-  }
 }
 
 class _SummaryGrid extends StatelessWidget {
-  const _SummaryGrid();
+  const _SummaryGrid({required this.store});
+
+  final MedicationStore store;
 
   @override
   Widget build(BuildContext context) {
@@ -85,21 +106,23 @@ class _SummaryGrid extends StatelessWidget {
             _SummaryCard(
               width: cardWidth,
               icon: Icons.inventory_2_outlined,
-              value: '8',
+              value: store.totalCount.toString(),
               label: 'medicamentos cadastrados',
               color: ZeloColors.petroleumBlue,
             ),
             _SummaryCard(
               width: cardWidth,
               icon: Icons.schedule,
-              value: '2',
+              value: store
+                  .countByStatus(MedicationStatus.expiringSoon)
+                  .toString(),
               label: 'próximos do vencimento',
               color: ZeloColors.warningAmber,
             ),
             _SummaryCard(
               width: cardWidth,
               icon: Icons.error_outline,
-              value: '1',
+              value: store.countByStatus(MedicationStatus.expired).toString(),
               label: 'medicamento vencido',
               color: ZeloColors.expiredRed,
             ),
@@ -181,8 +204,8 @@ class _NoticeCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Os números desta tela são dados simulados para validar a '
-                'estrutura visual inicial.',
+                'Os medicamentos desta versão ficam somente na memória e são '
+                'apagados quando o aplicativo é encerrado.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
