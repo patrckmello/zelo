@@ -2,8 +2,9 @@
 
 ## Estado
 
-Documento inicial. A separação de responsabilidades está confirmada; detalhes
-de implementação permanecem planejados até serem validados em código.
+A separação de responsabilidades está confirmada. O fluxo manual de
+medicamentos já foi implementado e validado em memória; backend, persistência,
+autenticação e integração EcoMed permanecem planejados.
 
 ## Visão de contexto
 
@@ -53,7 +54,7 @@ Responsabilidades:
 - consumo exclusivo da API do Zelo;
 - tratamento consistente de carregamento, sucesso, vazio e erro.
 
-Organizacao inicial por funcionalidade:
+Organização por funcionalidade:
 
 ```text
 lib/
@@ -78,9 +79,28 @@ lib/
 `-- main.dart
 ```
 
-As subcamadas `data`, `domain` e `presentation` serão criadas apenas quando uma
-funcionalidade realmente precisar delas. Isso reduz cerimônia para uma equipe
-de duas pessoas.
+As subcamadas são criadas quando uma funcionalidade realmente precisa delas.
+Isso reduz cerimônia para uma equipe de duas pessoas.
+
+### Fluxo de medicamentos implementado
+
+`ZeloApp` cria um único `MedicationStore`, baseado em `ChangeNotifier`, e o
+compartilha com a página inicial e as telas de medicamentos. O modelo de domínio
+centraliza a classificação por validade e não depende da interface.
+
+~~~text
+ZeloApp
+  → MedicationStore em memória
+    → página inicial e resumo
+    → lista de medicamentos
+    → formulário de cadastro e edição
+    → detalhes e remoção
+~~~
+
+O armazenamento em memória contém dados iniciais para demonstração e oferece
+operações de cadastro, atualização, busca e remoção. A persistência será
+substituída por um repositório conectado à API Zelo no M4, sem duplicar a regra
+de validade nas telas.
 
 ## Backend
 
@@ -96,7 +116,7 @@ Responsabilidades planejadas:
 - erros estáveis, observabilidade sem dados sensíveis e auditoria técnica.
 
 Os pontos EcoMed não serão persistidos permanentemente no primeiro momento. O
-tempo de expiração do cache será configuravel.
+tempo de expiração do cache será configurável.
 
 ## Dados iniciais
 
@@ -105,15 +125,15 @@ tempo de expiração do cache será configuravel.
 - Medicamento;
 - configuração de notificação;
 - Descarte e itens descartados;
-- registros tecnicos estritamente necessarios;
+- registros técnicos estritamente necessários;
 - cache geográfico, que pode usar uma tecnologia definida no marco do backend.
 
 ## Restrições
 
-- Android e o alvo prioritário do MVP;
+- Android é o alvo prioritário do MVP;
 - nenhum aconselhamento médico;
 - nenhum segredo no aplicativo, Git ou logs;
-- câmera e localização somente mediante contexto, explicacao e permissão;
+- câmera e localização somente mediante contexto, explicação e permissão;
 - dados externos não confiáveis não podem ser apresentados como garantia;
 - onboarding não deve solicitar permissões antecipadamente;
 - animações devem respeitar redução de movimento.

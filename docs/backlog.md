@@ -52,13 +52,18 @@ seguro de tokens e recuperação de senha serão concluídos junto ao backend.
 
 ## M3 - Fluxo manual simulado
 
-Estado: planejado.
+Estado: concluído em 24/08/2026.
 
-- modelo tipado de medicamento;
-- regra testada de situação da validade;
-- lista, cadastro, edição, detalhes e remoção em memória;
-- estados vazio e erro simulados;
-- resumo da farmácia doméstica.
+- [x] criar modelo tipado de medicamento;
+- [x] classificar validade com janela padrão de 30 dias e datas-limite testadas;
+- [x] listar, cadastrar, editar, detalhar e remover medicamentos em memória;
+- [x] ordenar medicamentos por validade;
+- [x] exibir estados vazio e erro simulado com tentativa novamente;
+- [x] atualizar dinamicamente o resumo da farmácia doméstica;
+- [x] validar formatação, análise estática, 12 testes e build Web.
+
+Limitação conhecida: a versão deste marco não possui persistência. Os dados
+voltam ao estado inicial quando o aplicativo é reiniciado.
 
 ## M4 - Backend e persistência
 

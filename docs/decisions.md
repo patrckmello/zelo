@@ -59,9 +59,12 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 
 ## D009 - Regra de proximidade do vencimento
 
-- Estado: pendente
-- Questão: quantos dias antes da validade classificam um medicamento como
-  próximo do vencimento e se o usuário poderá configurar esse período.
+- Estado: aceita
+- Decisão: usar janela padrão de 30 dias corridos, com comparação apenas da data.
+- Limites: validade anterior à data de referência é vencida; de hoje até 30 dias,
+  inclusive, está próxima do vencimento; acima de 30 dias está válida.
+- Configuração: a regra aceita outra janela internamente, mas a interface ainda
+  não oferece configuração ao usuário.
 
 ## D010 - Fluxo inicial obrigatório
 
@@ -96,3 +99,14 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 - Regra operacional: uma tarefa não é considerada concluída se o código mudou e
   a documentação correspondente permaneceu desatualizada.
 - Aplicação: agentes devem seguir AGENTS.md em todas as sessões futuras.
+
+
+## D014 - Estado do fluxo manual
+
+- Estado: aceita
+- Decisão: usar `MedicationStore` com `ChangeNotifier` e armazenamento em
+  memória para validar o primeiro fluxo vertical sem dependências externas.
+- Consequência: a página inicial e as telas de medicamentos compartilham o mesmo
+  estado durante a execução, mas os dados são reiniciados ao fechar o app.
+- Evolução: a persistência será conectada no M4 preservando as regras de domínio
+  e os testes já existentes.

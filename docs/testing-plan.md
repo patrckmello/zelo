@@ -39,7 +39,7 @@ evidências reproduzíveis para o desenvolvimento e a Mostra Científica.
 - normalização das respostas EcoMed com fixtures anonimizadas;
 - chave de cache com coordenadas arredondadas a três casas;
 - expiração, cache hit/miss, timeout e rate limit;
-- ausencia de chaves e dados sensíveis nos logs.
+- ausência de chaves e dados sensíveis nos logs.
 
 ## Fluxos funcionais
 
@@ -52,6 +52,21 @@ evidências reproduzíveis para o desenvolvimento e a Mostra Científica.
 7. localizar e consultar um ponto;
 8. abrir rota externa;
 9. registrar e consultar um descarte.
+
+## Validação executada no M3
+
+Em 24/08/2026, os commits `76f5abd` e `33ec173` foram verificados com:
+
+- formatação do código Dart;
+- `flutter analyze` sem problemas;
+- 12 testes automatizados aprovados;
+- `flutter build web` concluído;
+- testes unitários das datas-limite e das operações do `MedicationStore`;
+- testes de widget para resumo, navegação, validação, cadastro, edição, remoção,
+  estado vazio e recuperação do erro simulado.
+
+A execução em Android real ou emulador permanece pendente por indisponibilidade
+do Android SDK no ambiente usado.
 
 ## Evidências
 
