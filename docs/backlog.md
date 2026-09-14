@@ -34,12 +34,16 @@ Estado: em andamento.
 
 ## M2 - Experiência inicial e autenticação
 
-Estado: planejado.
+Estado: em andamento.
 
 - desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha;
-- criar splash nativa estática com fundo monocromático e logo;
-- criar animação curta da logo após a inicialização do Flutter;
-- respeitar configuração de redução de movimento;
+- [x] integrar o símbolo da marca como ativo Flutter e recurso Android;
+- [ ] validar a splash nativa estática com fundo monocromático e símbolo no
+  Android; a implementação foi adicionada, mas o SDK Android segue indisponível;
+- [ ] validar a animação curta da marca após a inicialização do Flutter; a
+  implementação e os testes existem, mas ainda não foram executados;
+- [ ] validar que a configuração de redução de movimento ignora a animação; o
+  cenário automatizado existe, mas ainda não foi executado;
 - criar onboarding de três páginas com opção de pular;
 - persistir a conclusão do onboarding no dispositivo;
 - criar interfaces de login, cadastro e recuperação de senha;
@@ -49,6 +53,10 @@ Estado: planejado.
 
 A interface poderá começar com estado simulado. Autenticação real, armazenamento
 seguro de tokens e recuperação de senha serão concluídos junto ao backend.
+
+Bloqueio de validação em 14/09/2026: o clone atual não contém `.tools/flutter` e
+não há Flutter/Dart global. A evidência anterior de 12 testes do M3 permanece
+válida, mas não cobre as mudanças desta etapa.
 
 ## M3 - Fluxo manual simulado
 

@@ -13,7 +13,9 @@ void main() {
     final store = MedicationStore.seeded(clock: () => referenceDate);
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(ZeloApp(medicationStore: store));
+    await tester.pumpWidget(
+      ZeloApp(medicationStore: store, showBrandIntro: false),
+    );
 
     expect(find.text('Cuide. Organize. Descarte certo.'), findsOneWidget);
     expect(find.text('Sua farmácia doméstica'), findsOneWidget);
@@ -34,7 +36,9 @@ void main() {
     final store = MedicationStore(clock: () => referenceDate);
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(ZeloApp(medicationStore: store));
+    await tester.pumpWidget(
+      ZeloApp(medicationStore: store, showBrandIntro: false),
+    );
     await tester.tap(find.text('Cadastrar medicamento'));
     await tester.pumpAndSettle();
 
@@ -88,7 +92,9 @@ void main() {
     );
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(ZeloApp(medicationStore: store));
+    await tester.pumpWidget(
+      ZeloApp(medicationStore: store, showBrandIntro: false),
+    );
     await tester.tap(find.byIcon(Icons.medication_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Loratadina'));
@@ -128,7 +134,9 @@ void main() {
     );
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(ZeloApp(medicationStore: store));
+    await tester.pumpWidget(
+      ZeloApp(medicationStore: store, showBrandIntro: false),
+    );
     await tester.tap(find.byIcon(Icons.medication_outlined));
     await tester.pumpAndSettle();
 

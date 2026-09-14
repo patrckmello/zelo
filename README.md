@@ -25,14 +25,18 @@ integration, onboarding, and Android device validation remain planned.
 
 - **Confirmado:** Flutter/Dart, Android como prioridade, API própria e uso
   autorizado da API EcoMed por meio do backend.
-- **Implementado:** repositório, documentação, scaffold Flutter, tema Material 3,
-  resumo dinâmico da farmácia doméstica e fluxo manual de medicamentos em
-  memória: listagem, cadastro, edição, detalhes e remoção.
+- **Implementado e verificado:** repositório, documentação, scaffold Flutter,
+  tema Material 3, resumo dinâmico da farmácia doméstica e fluxo manual de
+  medicamentos em memória: listagem, cadastro, edição, detalhes e remoção.
+- **Em validação:** símbolo oficial integrado aos ativos, splash nativa Android
+  e animação curta da marca em Flutter, com desativação quando o sistema pede
+  redução de movimento.
 - **Verificado:** formatação, análise estática, 12 testes automatizados e build
   Web nos commits `76f5abd` e `33ec173`.
-- **Pendente:** Android SDK/JDK 17 para executar e validar o aplicativo no Android.
-- **Planejado:** splash, onboarding, autenticação, persistência, backend, banco,
-  EcoMed e notificações.
+- **Pendente no ambiente atual:** restaurar o SDK Flutter portátil e disponibilizar
+  Android SDK/JDK 17 para executar a nova suíte e validar a abertura no Android.
+- **Planejado:** onboarding, autenticação, persistência, backend, banco, EcoMed e
+  notificações.
 - **Fora do núcleo inicial:** OCR e mapa embutido.
 
 ## Fluxo inicial planejado
@@ -113,8 +117,9 @@ logs. O contrato real da API deverá ser inspecionado antes da implementação.
 
 ## Como executar o aplicativo
 
-O SDK Flutter portátil está em `.tools/flutter` e não é versionado. Nesta
-máquina, execute pela raiz do repositório:
+Quando disponibilizado, o SDK Flutter portátil deve ficar em `.tools/flutter` e
+não é versionado. No clone inspecionado em 14/09/2026 esse diretório não estava
+presente. Com o SDK restaurado, execute pela raiz do repositório:
 
 ```powershell
 cd mobile
@@ -141,18 +146,22 @@ cd mobile
 ..\.tools\flutter\bin\flutter.bat test
 ```
 
-O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A versão
-atual possui 12 testes automatizados. Os dados dos medicamentos permanecem
-somente em memória e são reiniciados quando o aplicativo é fechado.
+O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A suíte
+possui 14 testes no código: os 12 testes do fluxo de medicamentos foram
+executados e aprovados em 24/08/2026; os dois testes novos da abertura aguardam
+execução porque o SDK Flutter não está disponível neste clone. Os dados dos
+medicamentos permanecem somente em memória e são reiniciados quando o aplicativo
+é fechado.
 
 ## Próximos passos
 
-1. Instalar ou disponibilizar Android SDK e JDK 17.
-2. Validar o ambiente Android com `flutter doctor -v`.
-3. Desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha.
-4. Implementar o fluxo inicial e sua navegação com estados simulados.
-5. Iniciar backend, persistência e autenticação real.
-6. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras já testadas.
-7. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
+1. Restaurar o SDK Flutter portátil e executar formatação, análise e os 14 testes.
+2. Instalar ou disponibilizar Android SDK e JDK 17.
+3. Validar a splash em Android real ou emulador, inclusive sem tela branca.
+4. Desenhar no Figma onboarding, login, cadastro e recuperação de senha.
+5. Implementar o restante do fluxo inicial e sua navegação com estados simulados.
+6. Iniciar backend, persistência e autenticação real.
+7. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras já testadas.
+8. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
 
 Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.

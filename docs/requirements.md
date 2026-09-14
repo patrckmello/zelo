@@ -31,8 +31,8 @@ verificado nesta versão.
 | RF14 | Solicitar recuperação de senha | Planejado |
 | RF15 | Restaurar uma sessão válida ao reabrir o aplicativo | Planejado |
 | RF16 | Encerrar a sessão do usuário | Planejado |
-| RF17 | Exibir splash nativa com fundo monocromático e logo do Zelo | Planejado |
-| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Planejado |
+| RF17 | Exibir splash nativa com fundo monocromático e logo do Zelo | Pendente de verificação em Android |
+| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Pendente de verificação automatizada |
 | RF19 | Apresentar onboarding no primeiro acesso | Planejado |
 | RF20 | Permitir pular o onboarding e não repeti-lo após sua conclusão | Planejado |
 
@@ -87,8 +87,10 @@ A regra usa datas civis, sem horário: uma validade anterior à data de referên
 é vencida; de hoje até 30 dias, inclusive, está próxima do vencimento; acima de
 30 dias está válida. O dia da validade ainda não é considerado vencido.
 
-## Critério do fluxo de entrada planejado
+## Estado do fluxo de entrada
 
-Splash, onboarding e autenticação permanecem planejados. Quando implementados,
-o usuário deverá concluir ou pular o onboarding, autenticar-se e chegar à página
-inicial sem permissões solicitadas antecipadamente.
+A splash Android e a animação Flutter estão presentes no código, mas não recebem
+o estado Implementado até a execução das validações pendentes. Onboarding e
+autenticação permanecem planejados. Quando implementados, o usuário deverá
+concluir ou pular o onboarding, autenticar-se e chegar à página inicial sem
+permissões solicitadas antecipadamente.

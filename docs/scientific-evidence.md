@@ -28,6 +28,16 @@ As regras de validade verificadas foram: data anterior como vencida; dia da
 validade ainda dentro da janela; limite de 30 dias incluído; acima de 30 dias
 como válido; e suporte interno a uma janela configurável.
 
+## Tentativa de validação da abertura
+
+- Data: 14/09/2026
+- Versão: entrega M2 de identidade de abertura
+- Escopo: splash Android, animação da marca e redução de movimento
+- Resultado: PENDENTE
+- Evidência observada: `.tools/flutter` ausente e nenhum executável Flutter/Dart
+  disponível globalmente; a suíte nova não foi executada
+- Validação Android: PENDENTE por ausência de Android SDK/JDK 17
+
 ## Desempenho da API
 
 | Cenário | Amostras | Mediana | P95 | Observações |
@@ -64,7 +74,9 @@ privacidade e sem armazenar dados pessoais desnecessários.
 ## Limitações
 
 - O armazenamento é somente em memória e volta aos dados iniciais ao reiniciar.
-- Android SDK indisponível; execução Android ainda não foi validada.
-- Splash, onboarding e autenticação ainda estão apenas planejados.
+- Flutter SDK e Android SDK indisponíveis no clone atual; as mudanças do M2 ainda
+  não possuem execução automatizada nem validação Android.
+- Splash e animação estão no código, com validação pendente; onboarding e
+  autenticação ainda estão apenas planejados.
 - Backend, persistência e integração EcoMed ainda não foram implementados.
 - Não existem resultados de desempenho da API ou de usabilidade coletados.

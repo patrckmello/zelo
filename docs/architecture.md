@@ -3,7 +3,8 @@
 ## Estado
 
 A separação de responsabilidades está confirmada. O fluxo manual de
-medicamentos já foi implementado e validado em memória; backend, persistência,
+medicamentos já foi implementado e validado em memória. A splash Android e a
+animação Flutter estão no código, com validação pendente; backend, persistência,
 autenticação e integração EcoMed permanecem planejados.
 
 ## Visão de contexto
@@ -42,6 +43,22 @@ A animação da marca pertence à camada Flutter e não deve bloquear operaçõe
 reais de inicialização. O estado de conclusão do onboarding não é sensível e
 pode ser persistido localmente. Tokens de sessão são sensíveis e deverão usar
 armazenamento seguro específico da plataforma.
+
+### Recorte de abertura em validação
+
+O Android usa `LaunchTheme` com fundo `#F4F7F6` e o símbolo da marca em um
+recurso nativo. A primeira tela Flutter mantém o mesmo fundo, anima o PNG por
+800 ms e então entrega o controle à `ZeloShell`. Com redução de movimento ativa,
+a tela chama a conclusão no primeiro quadro e não executa a animação.
+
+~~~text
+LaunchTheme Android
+  → BrandIntroPage Flutter
+    → ZeloShell existente
+~~~
+
+Esse recorte ainda não lê onboarding nem sessão. Essas ramificações continuam
+planejadas e serão inseridas entre a abertura da marca e a `ZeloShell`.
 
 ## Aplicativo
 

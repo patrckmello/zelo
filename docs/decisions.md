@@ -79,9 +79,15 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 - Estado: proposta
 - Proposta: usar splash nativa estática seguida de animação curta executada pelo
   Flutter, aproveitando o movimento circular da seta de devolução.
-- Preferência técnica: avaliar Rive a partir da logo vetorial.
+- Implementação em validação: usar o PNG oficial disponível com opacidade, escala
+  e rotação por 800 ms, sem dependência externa. Quando a redução de movimento
+  está ativa, a animação é ignorada.
+- Rive não foi adicionado porque o repositório ainda não contém a fonte vetorial
+  da marca. A alternativa poderá ser reavaliada quando esse arquivo existir.
 - Restrição: a animação não deve simular carregamento inexistente nem atrasar
   desnecessariamente a entrada. Deve respeitar redução de movimento.
+- Evidência pendente: executar os testes Flutter e validar a transição da splash
+  nativa em Android real ou emulador antes de aceitar definitivamente a decisão.
 
 ## D012 - Autenticação do MVP
 

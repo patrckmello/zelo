@@ -17,13 +17,19 @@ O armazenamento não é persistente: os dados voltam ao estado inicial quando o
 aplicativo é reiniciado. Persistência e integração com a API Zelo pertencem ao
 marco do backend.
 
+A identidade de abertura está em validação. O código contém uma splash Android
+com fundo monocromático, seguida por animação curta do símbolo em Flutter. A
+animação é ignorada quando a redução de movimento está ativa. Onboarding e
+autenticação ainda não foram implementados.
+
 ## Validação atual
 
 - `dart format`: aprovado;
 - `flutter analyze`: sem problemas;
-- `flutter test`: 12 testes aprovados;
+- `flutter test`: 12 testes do M3 aprovados em 24/08/2026;
 - `flutter build web`: aprovado.
 
-O Android SDK ainda não está disponível nesta máquina. Enquanto isso, o app
-pode ser executado e validado no Chrome por meio do Flutter portátil descrito
-no README da raiz.
+Dois testes de abertura foram adicionados, totalizando 14 testes no código, mas
+a suíte atualizada ainda não foi executada. No clone inspecionado em 14/09/2026,
+o SDK Flutter portátil descrito no README da raiz e o Android SDK não estavam
+disponíveis. A splash nativa precisa ser validada em Android real ou emulador.

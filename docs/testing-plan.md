@@ -68,6 +68,23 @@ Em 24/08/2026, os commits `76f5abd` e `33ec173` foram verificados com:
 A execução em Android real ou emulador permanece pendente por indisponibilidade
 do Android SDK no ambiente usado.
 
+## Validação pendente da abertura
+
+Em 14/09/2026 foram adicionados dois testes de widget: conclusão automática da
+animação e conclusão imediata quando `disableAnimations` está ativo. A suíte
+passou a conter 14 testes no código, mas os comandos não foram executados porque
+o clone atual não contém `.tools/flutter` e não há Flutter/Dart global.
+
+Também permanecem pendentes em Android real ou emulador:
+
+- exibição do símbolo sobre fundo monocromático durante a inicialização nativa;
+- ausência de quadro branco na transição para Flutter;
+- dimensões e recorte do símbolo em versões anteriores e posteriores ao Android 12;
+- transição automática para a página inicial.
+
+Resultado observado nesta tentativa: **PENDENTE por ambiente**, sem alegação de
+aprovação da formatação, análise, testes ou build para as mudanças do M2.
+
 ## Evidências
 
 Cada execução relevante deve registrar data, versão/commit, dispositivo ou
