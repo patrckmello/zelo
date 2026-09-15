@@ -10,6 +10,8 @@ class HomePage extends StatelessWidget {
     required this.onAddMedication,
     required this.onOpenMedications,
     required this.onOpenDisposal,
+    required this.onLogout,
+    this.isLoggingOut = false,
     super.key,
   });
 
@@ -17,6 +19,8 @@ class HomePage extends StatelessWidget {
   final VoidCallback onAddMedication;
   final VoidCallback onOpenMedications;
   final VoidCallback onOpenDisposal;
+  final Future<void> Function() onLogout;
+  final bool isLoggingOut;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +35,28 @@ class HomePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Zelo',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Zelo',
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                      ),
+                      IconButton(
+                        key: const ValueKey('logout-button'),
+                        onPressed: isLoggingOut ? null : onLogout,
+                        tooltip: 'Sair da conta',
+                        icon: isLoggingOut
+                            ? const SizedBox.square(
+                                dimension: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.logout),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

@@ -7,8 +7,8 @@ abstract final class ZeloTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: ZeloColors.green,
       brightness: Brightness.light,
-      primary: ZeloColors.green,
-      secondary: ZeloColors.petroleumBlue,
+      primary: ZeloColors.petroleumBlue,
+      secondary: ZeloColors.green,
       surface: Colors.white,
       error: ZeloColors.expiredRed,
     );

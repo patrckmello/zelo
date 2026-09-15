@@ -28,15 +28,28 @@ As regras de validade verificadas foram: data anterior como vencida; dia da
 validade ainda dentro da janela; limite de 30 dias incluído; acima de 30 dias
 como válido; e suporte interno a uma janela configurável.
 
-## Tentativa de validação da abertura
+## Validação automatizada do M2
 
 - Data: 14/09/2026
-- Versão: entrega M2 de identidade de abertura
-- Escopo: splash Android, animação da marca e redução de movimento
-- Resultado: PENDENTE
-- Evidência observada: `.tools/flutter` ausente e nenhum executável Flutter/Dart
-  disponível globalmente; a suíte nova não foi executada
-- Validação Android: PENDENTE por ausência de Android SDK/JDK 17
+- Base: commit `526feea` mais alterações locais do M2, ainda sem commit
+- Ambiente: Windows 11, Flutter 3.47.1 e Dart 3.13.1 portáteis
+- Resultado: formatação aprovada, análise sem problemas, 37 testes aprovados e
+  build Web concluído
+- Escopo observado: animação da marca, redução de movimento, bootstrap,
+  onboarding, autenticação simulada, logout, navegação e regressão de
+  medicamentos
+- Layout automatizado: viewport 390 × 844, texto em escala 2 no onboarding e
+  teclado aberto no login, sem exceção de overflow
+- Ativo: PNG Flutter e recurso Android idênticos por SHA-256, 320 × 320,
+  transparentes nas bordas e sem conteúdo tocando os limites
+- Contraste calculado: azul-petróleo `#174C5B` sobre `#F4F7F6` = 8,77:1
+- Validação Android: **PENDENTE**; Android SDK, `adb`, `sdkmanager` e JDK 17 não
+  estão disponíveis. Não houve inspeção real/emulada da splash ou da transição
+  nativa
+
+Os resultados acima comprovam o comportamento automatizado e a compilação Web,
+mas não comprovam aparência em Android, ausência de quadro branco no dispositivo
+ou usabilidade com participantes.
 
 ## Desempenho da API
 
@@ -56,14 +69,28 @@ como válido; e suporte interno a uma janela configurável.
 
 ## Avaliação de usabilidade
 
-- Protocolo e consentimento definidos: PENDENTE
-- Quantidade de participantes: PENDENTE
+- Protocolo planejado: 12 adultos, tarefas orientadas e perguntas abertas;
+  consentimento e aplicação permanecem PENDENTES
+- Quantidade de participantes observada: PENDENTE
 - Tempo para concluir o primeiro acesso: PENDENTE
 - Tempo para cadastrar medicamento: PENDENTE
 - Tempo para localizar ponto: PENDENTE
 - Taxa de conclusão: PENDENTE
-- Clareza/facilidade percebida: PENDENTE
-- Problemas observados: PENDENTE
+- Erros e dificuldades observados: PENDENTE
+- Relação dos participantes com o SUS: PENDENTE
+- Clareza/facilidade e respostas abertas: PENDENTE
+
+## Enquadramento acadêmico e tratamento futuro dos dados
+
+- ODS 3: relação conceitual confirmada pelo foco em cuidado e prevenção de risco;
+  impacto mensurado: PENDENTE.
+- ODS 12: relação conceitual confirmada pela redução de desperdício e descarte
+  responsável; impacto mensurado: PENDENTE.
+- Divergências EcoMed: metodologia futura definida por normalização,
+  identificação da origem, priorização de farmácias `logmed-*`, aviso para
+  unidades públicas e omissão de horários ausentes. Resultados: PENDENTE.
+- Medicamentos são classificados pelo projeto como dados indiretos de saúde;
+  nenhuma coleta com participantes foi realizada nesta etapa.
 
 ## OCR
 
@@ -74,9 +101,11 @@ privacidade e sem armazenar dados pessoais desnecessários.
 ## Limitações
 
 - O armazenamento é somente em memória e volta aos dados iniciais ao reiniciar.
-- Flutter SDK e Android SDK indisponíveis no clone atual; as mudanças do M2 ainda
-  não possuem execução automatizada nem validação Android.
-- Splash e animação estão no código, com validação pendente; onboarding e
-  autenticação ainda estão apenas planejados.
+- Android SDK e JDK 17 indisponíveis; APK, splash e transição nativa não foram
+  validados em dispositivo ou emulador.
+- A autenticação é simulada e persiste somente um marcador booleano. Não há
+  proteção de conta, isolamento de usuários, token seguro ou envio de e-mail.
+- Termos de uso e política de privacidade permanecem PENDENTES de conteúdo e
+  aprovação.
 - Backend, persistência e integração EcoMed ainda não foram implementados.
 - Não existem resultados de desempenho da API ou de usabilidade coletados.

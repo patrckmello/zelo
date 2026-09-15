@@ -16,49 +16,57 @@ como resultados comprovados.
 Zelo is an academic mobile application project from CESUCA focused on helping
 people organize medicines stored at home, monitor expiration dates, and find
 appropriate collection points for responsible disposal. The Android-first MVP
-will use Flutter and Dart, supported by a dedicated backend that protects the
-EcoMed API key and provides normalized, cached collection-point data. The repository now includes an implemented and automated-tested in-memory
-medication management vertical slice. Persistence, authentication, EcoMed
-integration, onboarding, and Android device validation remain planned.
+uses Flutter and Dart, supported in the future by a dedicated backend that
+protects the EcoMed API key and provides normalized, cached collection-point
+data. The repository includes an in-memory medication flow plus a three-page
+onboarding and replaceable simulated authentication. Real authentication,
+backend persistence, EcoMed integration, and Android device validation remain
+planned or pending.
 
 ## Estado atual
 
 - **Confirmado:** Flutter/Dart, Android como prioridade, API própria e uso
   autorizado da API EcoMed por meio do backend.
 - **Implementado e verificado:** repositório, documentação, scaffold Flutter,
-  tema Material 3, resumo dinâmico da farmácia doméstica e fluxo manual de
-  medicamentos em memória: listagem, cadastro, edição, detalhes e remoção.
-- **Em validação:** símbolo oficial integrado aos ativos, splash nativa Android
-  e animação curta da marca em Flutter, com desativação quando o sistema pede
-  redução de movimento.
-- **Verificado:** formatação, análise estática, 12 testes automatizados e build
-  Web nos commits `76f5abd` e `33ec173`.
-- **Pendente no ambiente atual:** restaurar o SDK Flutter portátil e disponibilizar
-  Android SDK/JDK 17 para executar a nova suíte e validar a abertura no Android.
-- **Planejado:** onboarding, autenticação, persistência, backend, banco, EcoMed e
-  notificações.
+  tema Material 3, fluxo manual de medicamentos em memória, animação Flutter,
+  bootstrap recuperável, onboarding e autenticação simulada substituível.
+- **Persistido localmente:** somente `onboarding_completed` e o marcador booleano
+  não sensível `simulated_session_active`, por meio de `shared_preferences`.
+- **Verificado em 14/09/2026:** formatação, análise estática, 37 testes
+  automatizados e build Web com Flutter 3.47.1/Dart 3.13.1.
+- **Pendente no ambiente atual:** Android SDK, JDK 17 e dispositivo/emulador para
+  validar a splash nativa e a transição Android → Flutter.
+- **Planejado para o M4:** autenticação real, isolamento entre usuários,
+  armazenamento seguro de tokens, backend e persistência de medicamentos.
 - **Fora do núcleo inicial:** OCR e mapa embutido.
 
-## Fluxo inicial planejado
+## Fluxo inicial implementado
 
 ~~~text
 Splash nativa estática
 → animação curta da marca
+→ bootstrap recuperável
 → verificar primeiro acesso
 → onboarding, quando necessário
 → verificar sessão
 → login ou página inicial
 ~~~
 
-A splash usará fundo monocromático e a logo do Zelo. A animação deverá explorar
-o movimento circular da seta de devolução sem atrasar desnecessariamente a
-abertura. O onboarding apresentará organização, prevenção de desperdício e
-descarte responsável. Câmera e localização serão solicitadas somente no
-contexto da funcionalidade que precisar delas.
+A splash usa fundo monocromático e o símbolo do Zelo. A animação de 800 ms
+explora o movimento circular da seta e é ignorada quando o sistema solicita
+redução de movimento. O onboarding apresenta organização, prevenção de
+desperdício e descarte responsável. Câmera, localização e notificações não são
+solicitadas nesse fluxo.
+
+A autenticação desta versão é deliberadamente simulada. Login, cadastro,
+recuperação, restauração de sessão e logout exercitam a interface e a navegação,
+mas não representam proteção de conta. Nenhuma senha, nome ou e-mail é
+persistido; o aplicativo salva apenas um booleano de sessão de demonstração.
 
 ## Tecnologias planejadas
 
 - Aplicativo: Flutter, Dart e Material 3;
+- Preferências locais não sensíveis: `shared_preferences 2.5.5`;
 - Backend: Python, FastAPI, SQLAlchemy e Alembic;
 - Dados: PostgreSQL;
 - Infraestrutura local: Docker Compose;
@@ -117,9 +125,8 @@ logs. O contrato real da API deverá ser inspecionado antes da implementação.
 
 ## Como executar o aplicativo
 
-Quando disponibilizado, o SDK Flutter portátil deve ficar em `.tools/flutter` e
-não é versionado. No clone inspecionado em 14/09/2026 esse diretório não estava
-presente. Com o SDK restaurado, execute pela raiz do repositório:
+O SDK Flutter portátil restaurado deve ficar em `.tools/flutter` e não é
+versionado. Com ele, execute pela raiz do repositório:
 
 ```powershell
 cd mobile
@@ -147,21 +154,20 @@ cd mobile
 ```
 
 O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A suíte
-possui 14 testes no código: os 12 testes do fluxo de medicamentos foram
-executados e aprovados em 24/08/2026; os dois testes novos da abertura aguardam
-execução porque o SDK Flutter não está disponível neste clone. Os dados dos
-medicamentos permanecem somente em memória e são reiniciados quando o aplicativo
-é fechado.
+possui 37 testes aprovados em 14/09/2026. Ela cobre a abertura, redução de
+movimento, bootstrap, onboarding, autenticação simulada, navegação autenticada,
+responsividade essencial e o fluxo de medicamentos. Os dados dos medicamentos
+permanecem somente em memória e são reiniciados quando o aplicativo é fechado.
 
 ## Próximos passos
 
-1. Restaurar o SDK Flutter portátil e executar formatação, análise e os 14 testes.
-2. Instalar ou disponibilizar Android SDK e JDK 17.
-3. Validar a splash em Android real ou emulador, inclusive sem tela branca.
-4. Desenhar no Figma onboarding, login, cadastro e recuperação de senha.
-5. Implementar o restante do fluxo inicial e sua navegação com estados simulados.
-6. Iniciar backend, persistência e autenticação real.
-7. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras já testadas.
-8. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
+1. Instalar ou disponibilizar Android SDK e JDK 17.
+2. Validar a splash e a transição em Android 12+ real ou emulador, inclusive sem
+   quadro branco, distorção ou recorte.
+3. Desenhar e reconciliar no Figma onboarding, login, cadastro e recuperação.
+4. Fornecer e aprovar os textos jurídicos de termos e política de privacidade.
+5. Iniciar backend, persistência e autenticação real no M4.
+6. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras testadas.
+7. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
 
 Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.

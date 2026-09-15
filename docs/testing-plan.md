@@ -70,10 +70,11 @@ do Android SDK no ambiente usado.
 
 ## Validação pendente da abertura
 
-Em 14/09/2026 foram adicionados dois testes de widget: conclusão automática da
-animação e conclusão imediata quando `disableAnimations` está ativo. A suíte
-passou a conter 14 testes no código, mas os comandos não foram executados porque
-o clone atual não contém `.tools/flutter` e não há Flutter/Dart global.
+Em 14/09/2026 o Flutter 3.47.1/Dart 3.13.1 foi restaurado em `.tools/flutter`.
+Os dois testes adicionados no commit `526feea` foram executados. O teste de
+conclusão usava uma verificação rígida no instante final e falhou; após trocar a
+sincronização por `pumpAndSettle`, os cenários de conclusão automática e
+`disableAnimations` foram aprovados. A duração de produção permaneceu em 800 ms.
 
 Também permanecem pendentes em Android real ou emulador:
 
@@ -82,8 +83,30 @@ Também permanecem pendentes em Android real ou emulador:
 - dimensões e recorte do símbolo em versões anteriores e posteriores ao Android 12;
 - transição automática para a página inicial.
 
-Resultado observado nesta tentativa: **PENDENTE por ambiente**, sem alegação de
-aprovação da formatação, análise, testes ou build para as mudanças do M2.
+## Validação executada no M2
+
+Em 14/09/2026, no Windows 11 com Flutter 3.47.1 e Dart 3.13.1:
+
+- `dart format --output=none --set-exit-if-changed .`: aprovado;
+- `flutter analyze`: aprovado, sem problemas;
+- `flutter test`: 37 testes aprovados;
+- `flutter build web`: aprovado;
+- bootstrap: primeiro acesso, sem sessão, sessão restaurada, erro e tentativa;
+- onboarding: avançar, voltar, pular, concluir e não reaparecer;
+- autenticação simulada: login válido/inválido, cadastro, confirmação de senha,
+  aceite, recuperação genérica, logout e bloqueio do retorno ao login;
+- regressão: os testes do fluxo manual de medicamentos permanecem aprovados;
+- layout automatizado: viewport 390 × 844, onboarding com texto em escala 2 e
+  login com teclado aberto, sem exceção de overflow.
+
+Essa verificação de layout é automatizada e não substitui inspeção visual em
+dispositivo. Contraste calculado: azul-petróleo `#174C5B` sobre o fundo
+`#F4F7F6` = 8,77:1. O símbolo Flutter e o recurso Android têm o mesmo SHA-256,
+320 × 320, transparência nas bordas e conteúdo sem tocar os limites.
+
+O build APK e a inspeção da splash não foram executados: `flutter doctor -v`
+não encontrou Android SDK, `adb` ou `sdkmanager`, e o Java global disponível é
+8, não o JDK 17 exigido.
 
 ## Evidências
 
@@ -101,12 +124,22 @@ Métricas planejadas:
 - latência da API com cache frio e quente;
 - quantidade de pontos retornados no recorte definido.
 
+### Avaliação acadêmica futura
+
+A avaliação de usabilidade está planejada com 12 adultos, mediante procedimento
+acadêmico e consentimento aplicáveis. Os participantes executarão tarefas
+orientadas do fluxo inicial, cadastro de medicamento e localização de ponto.
+Serão registrados tempo, conclusão, erros e dificuldades, além da relação com o
+SUS e respostas a perguntas abertas. Nenhum desses resultados foi coletado até
+esta versão e todos permanecem `PENDENTE`.
+
 ## Comandos de qualidade do Flutter
 
 ```powershell
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
+flutter build web
 ```
 
 A documentação relacionada deve ser revisada antes de considerar qualquer

@@ -7,9 +7,16 @@ import '../features/medications/presentation/medication_form_page.dart';
 import '../features/medications/presentation/medications_page.dart';
 
 class ZeloShell extends StatefulWidget {
-  const ZeloShell({required this.medicationStore, super.key});
+  const ZeloShell({
+    required this.medicationStore,
+    required this.onLogout,
+    this.isLoggingOut = false,
+    super.key,
+  });
 
   final MedicationStore medicationStore;
+  final Future<void> Function() onLogout;
+  final bool isLoggingOut;
 
   @override
   State<ZeloShell> createState() => _ZeloShellState();
@@ -47,6 +54,8 @@ class _ZeloShellState extends State<ZeloShell> {
             onAddMedication: _openMedicationForm,
             onOpenMedications: () => _selectDestination(1),
             onOpenDisposal: () => _selectDestination(2),
+            onLogout: widget.onLogout,
+            isLoggingOut: widget.isLoggingOut,
           ),
           MedicationsPage(store: widget.medicationStore),
           const _PlaceholderPage(

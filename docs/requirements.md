@@ -15,7 +15,7 @@ verificado nesta versão.
 
 | ID | Requisito | Estado |
 |---|---|---|
-| RF01 | Cadastrar conta com nome, e-mail e senha | Planejado |
+| RF01 | Cadastrar conta com nome, e-mail e senha | Implementado apenas como simulação local |
 | RF02 | Cadastrar medicamento com nome, validade, quantidade e observações | Implementado em memória |
 | RF03 | Listar medicamentos | Implementado em memória |
 | RF04 | Editar e remover medicamentos | Implementado em memória |
@@ -27,14 +27,14 @@ verificado nesta versão.
 | RF10 | Abrir rota em aplicativo externo | Planejado |
 | RF11 | Registrar descarte simples | Planejado |
 | RF12 | Consultar histórico de descartes | Planejado |
-| RF13 | Autenticar usuário por e-mail e senha | Planejado |
-| RF14 | Solicitar recuperação de senha | Planejado |
-| RF15 | Restaurar uma sessão válida ao reabrir o aplicativo | Planejado |
-| RF16 | Encerrar a sessão do usuário | Planejado |
+| RF13 | Autenticar usuário por e-mail e senha | Implementado apenas como simulação local |
+| RF14 | Solicitar recuperação de senha | Implementado apenas como confirmação simulada |
+| RF15 | Restaurar uma sessão válida ao reabrir o aplicativo | Implementado com marcador simulado não sensível |
+| RF16 | Encerrar a sessão do usuário | Implementado para a sessão simulada |
 | RF17 | Exibir splash nativa com fundo monocromático e logo do Zelo | Pendente de verificação em Android |
-| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Pendente de verificação automatizada |
-| RF19 | Apresentar onboarding no primeiro acesso | Planejado |
-| RF20 | Permitir pular o onboarding e não repeti-lo após sua conclusão | Planejado |
+| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Implementado e testado no Flutter; transição Android pendente |
+| RF19 | Apresentar onboarding no primeiro acesso | Implementado e testado |
+| RF20 | Permitir pular o onboarding e não repeti-lo após sua conclusão | Implementado e testado |
 
 ## Critérios do fluxo inicial
 
@@ -48,6 +48,9 @@ verificado nesta versão.
 - No retorno ao aplicativo, uma sessão válida direciona o usuário à página
   inicial; sessão ausente ou inválida direciona ao login.
 - A Mostra deverá possuir credencial de demonstração previamente validada.
+- Erros de preferências devem exibir mensagem segura e permitir nova tentativa.
+- Login e logout devem substituir o fluxo raiz, sem retorno às páginas de
+  entrada pelo botão Voltar depois da autenticação.
 
 ## Não funcionais
 
@@ -89,8 +92,23 @@ A regra usa datas civis, sem horário: uma validade anterior à data de referên
 
 ## Estado do fluxo de entrada
 
-A splash Android e a animação Flutter estão presentes no código, mas não recebem
-o estado Implementado até a execução das validações pendentes. Onboarding e
-autenticação permanecem planejados. Quando implementados, o usuário deverá
-concluir ou pular o onboarding, autenticar-se e chegar à página inicial sem
-permissões solicitadas antecipadamente.
+A animação Flutter, o bootstrap, o onboarding e a autenticação simulada estão
+implementados e cobertos por testes automatizados. A splash Android continua
+pendente de verificação em dispositivo ou emulador. O fluxo não solicita câmera,
+localização nem notificações.
+
+A simulação não armazena senha, nome ou e-mail, não cria JWT e não representa
+autenticação segura. Somente os booleanos `onboarding_completed` e
+`simulated_session_active` são persistidos localmente. Autenticação real,
+isolamento dos dados por usuário e tokens seguros pertencem ao M4.
+
+Os textos efetivos dos termos de uso e da política de privacidade são
+**PENDENTES** de fornecimento e aprovação; a interface valida apenas o aceite,
+sem inventar conteúdo jurídico.
+
+## Privacidade dos medicamentos
+
+Medicamentos cadastrados são tratados como dados indiretos de saúde. O projeto
+aplica minimização, não registra medicamentos, credenciais ou dados pessoais em
+logs e mantém a sessão simulada separada do `MedicationStore`. Fixtures de teste
+e demonstração são públicas e fictícias, sem informações reais.

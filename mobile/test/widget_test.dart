@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zelo/app/zelo_app.dart';
+import 'package:zelo/features/authentication/data/simulated_authentication_service.dart';
 import 'package:zelo/features/medications/application/medication_store.dart';
 import 'package:zelo/features/medications/domain/medication.dart';
 
+import 'support/in_memory_dependencies.dart';
+
 void main() {
   final referenceDate = DateTime(2026, 8, 24);
+
+  ZeloApp authenticatedApp(MedicationStore store) {
+    final sessionStore = InMemorySessionStore(active: true);
+    return ZeloApp(
+      medicationStore: store,
+      onboardingPreferences: InMemoryOnboardingPreferences(completed: true),
+      authenticationService: SimulatedAuthenticationService(
+        sessionStore: sessionStore,
+      ),
+      showBrandIntro: false,
+    );
+  }
 
   testWidgets('exibe resumo dinâmico e navega para os medicamentos', (
     tester,
@@ -13,9 +28,8 @@ void main() {
     final store = MedicationStore.seeded(clock: () => referenceDate);
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(
-      ZeloApp(medicationStore: store, showBrandIntro: false),
-    );
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
 
     expect(find.text('Cuide. Organize. Descarte certo.'), findsOneWidget);
     expect(find.text('Sua farmácia doméstica'), findsOneWidget);
@@ -36,9 +50,8 @@ void main() {
     final store = MedicationStore(clock: () => referenceDate);
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(
-      ZeloApp(medicationStore: store, showBrandIntro: false),
-    );
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Cadastrar medicamento'));
     await tester.pumpAndSettle();
 
@@ -92,9 +105,8 @@ void main() {
     );
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(
-      ZeloApp(medicationStore: store, showBrandIntro: false),
-    );
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.medication_outlined));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Loratadina'));
@@ -134,9 +146,8 @@ void main() {
     );
     addTearDown(store.dispose);
 
-    await tester.pumpWidget(
-      ZeloApp(medicationStore: store, showBrandIntro: false),
-    );
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.medication_outlined));
     await tester.pumpAndSettle();
 

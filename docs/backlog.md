@@ -36,27 +36,32 @@ Estado: em andamento.
 
 Estado: em andamento.
 
-- desenhar no Figma splash, onboarding, login, cadastro e recuperação de senha;
+- [ ] desenhar/reconciliar no Figma splash, onboarding, login, cadastro e
+  recuperação de senha;
 - [x] integrar o símbolo da marca como ativo Flutter e recurso Android;
 - [ ] validar a splash nativa estática com fundo monocromático e símbolo no
   Android; a implementação foi adicionada, mas o SDK Android segue indisponível;
-- [ ] validar a animação curta da marca após a inicialização do Flutter; a
-  implementação e os testes existem, mas ainda não foram executados;
-- [ ] validar que a configuração de redução de movimento ignora a animação; o
-  cenário automatizado existe, mas ainda não foi executado;
-- criar onboarding de três páginas com opção de pular;
-- persistir a conclusão do onboarding no dispositivo;
-- criar interfaces de login, cadastro e recuperação de senha;
-- restaurar sessão válida e disponibilizar logout;
-- preparar credencial de demonstração para a Mostra;
-- testar primeiro acesso, retorno ao aplicativo e rotas autenticadas.
+- [x] validar por teste automatizado a animação curta da marca após a
+  inicialização do Flutter; a transição nativa ainda depende de Android;
+- [x] validar que a configuração de redução de movimento ignora a animação;
+- [x] criar onboarding responsivo de três páginas com opção de pular;
+- [x] persistir a conclusão do onboarding no dispositivo;
+- [x] criar interfaces de login, cadastro e recuperação de senha;
+- [x] restaurar sessão simulada e disponibilizar logout;
+- [x] disponibilizar entrada de demonstração com fixture pública fictícia;
+- [x] testar primeiro acesso, retorno ao aplicativo e rotas autenticadas;
+- [ ] fornecer e aprovar os textos dos termos de uso e da política de
+  privacidade;
+- [ ] validar visualmente em Android real ou emulador, inclusive Android 12+.
 
-A interface poderá começar com estado simulado. Autenticação real, armazenamento
-seguro de tokens e recuperação de senha serão concluídos junto ao backend.
+A interface usa autenticação simulada substituível e persiste somente um marcador
+booleano não sensível. Autenticação real, isolamento de usuários, armazenamento
+seguro de tokens e recuperação efetiva serão concluídos no M4.
 
-Bloqueio de validação em 14/09/2026: o clone atual não contém `.tools/flutter` e
-não há Flutter/Dart global. A evidência anterior de 12 testes do M3 permanece
-válida, mas não cobre as mudanças desta etapa.
+Validação em 14/09/2026: o Flutter portátil foi restaurado; formatação, análise,
+37 testes e build Web foram aprovados. O M2 permanece **em andamento** porque a
+validação Android, a reconciliação visual no Figma e os textos jurídicos seguem
+pendentes.
 
 ## M3 - Fluxo manual simulado
 

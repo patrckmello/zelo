@@ -3,9 +3,10 @@
 ## Estado
 
 A separação de responsabilidades está confirmada. O fluxo manual de
-medicamentos já foi implementado e validado em memória. A splash Android e a
-animação Flutter estão no código, com validação pendente; backend, persistência,
-autenticação e integração EcoMed permanecem planejados.
+medicamentos, a animação Flutter, o bootstrap, o onboarding e a autenticação
+simulada foram implementados e validados por testes. A splash Android ainda
+depende de validação no dispositivo; backend, autenticação real, persistência de
+medicamentos e integração EcoMed permanecem planejados.
 
 ## Visão de contexto
 
@@ -31,34 +32,54 @@ limite compartilhado de requisições.
 
 ~~~text
 Splash nativa estática
-→ bootstrap Flutter e animação curta
-→ leitura do estado de onboarding
+→ animação Flutter curta
+→ bootstrap centralizado
+→ leitura de onboarding_completed
 → onboarding, se for primeiro acesso
-→ leitura segura da sessão
+→ leitura de simulated_session_active
 → login ou shell autenticada
 ~~~
 
 A splash nativa cobre o período anterior à primeira renderização do Flutter.
-A animação da marca pertence à camada Flutter e não deve bloquear operações
-reais de inicialização. O estado de conclusão do onboarding não é sensível e
-pode ser persistido localmente. Tokens de sessão são sensíveis e deverão usar
-armazenamento seguro específico da plataforma.
+A animação da marca pertence à camada Flutter e não bloqueia operações reais de
+inicialização. O estado de conclusão do onboarding não é sensível e é persistido
+localmente. A sessão do M2 é apenas um booleano de demonstração e não equivale a
+um token. Tokens reais são sensíveis e deverão usar armazenamento seguro no M4.
 
-### Recorte de abertura em validação
+### Abertura implementada
 
 O Android usa `LaunchTheme` com fundo `#F4F7F6` e o símbolo da marca em um
 recurso nativo. A primeira tela Flutter mantém o mesmo fundo, anima o PNG por
-800 ms e então entrega o controle à `ZeloShell`. Com redução de movimento ativa,
+800 ms e então entrega o controle ao bootstrap. Com redução de movimento ativa,
 a tela chama a conclusão no primeiro quadro e não executa a animação.
 
 ~~~text
 LaunchTheme Android
   → BrandIntroPage Flutter
-    → ZeloShell existente
+    → BootstrapController
+      ├─ primeiro acesso → OnboardingPage
+      ├─ sem sessão → LoginPage
+      ├─ sessão simulada → ZeloShell
+      └─ falha → erro recuperável
 ~~~
 
-Esse recorte ainda não lê onboarding nem sessão. Essas ramificações continuam
-planejadas e serão inseridas entre a abertura da marca e a `ZeloShell`.
+`BootstrapController` depende apenas de `OnboardingPreferences` e
+`AuthenticationService`, recebidos por construtor. O estado de erro não expõe a
+exceção interna e permite repetir a leitura. Login, cadastro, logout e conclusão
+do onboarding substituem o conteúdo da rota raiz, impedindo retorno indevido ao
+fluxo anterior.
+
+### Preferências e autenticação simulada
+
+`SharedPreferencesOnboardingPreferences` persiste somente
+`onboarding_completed`. `SharedPreferencesSessionStore` persiste somente
+`simulated_session_active`. As abstrações são separadas do `MedicationStore` e
+possuem implementações em memória nos testes.
+
+`AuthenticationService` define restauração, login, entrada de demonstração,
+cadastro, recuperação e logout. `SimulatedAuthenticationService` não cria conta,
+não envia e-mail, não persiste credenciais e não emite token. Uma implementação
+futura consumirá exclusivamente a API Zelo no M4.
 
 ## Aplicativo
 
@@ -83,7 +104,7 @@ lib/
 |   |-- constants/
 |   |-- errors/
 |   |-- network/
-|   |-- storage/
+|   |-- storage/       # onboarding e marcador de sessão, separados
 |   |-- theme/
 |   `-- widgets/
 |-- features/
@@ -118,6 +139,11 @@ O armazenamento em memória contém dados iniciais para demonstração e oferece
 operações de cadastro, atualização, busca e remoção. A persistência será
 substituída por um repositório conectado à API Zelo no M4, sem duplicar a regra
 de validade nas telas.
+
+Medicamentos são considerados dados indiretos de saúde. Nenhuma tela ou serviço
+novo registra medicamentos, senha, nome ou e-mail em logs. A autenticação
+simulada não é usada como chave de particionamento dos medicamentos; isolamento
+real entre usuários depende do backend do M4.
 
 ## Backend
 

@@ -17,19 +17,30 @@ O armazenamento não é persistente: os dados voltam ao estado inicial quando o
 aplicativo é reiniciado. Persistência e integração com a API Zelo pertencem ao
 marco do backend.
 
-A identidade de abertura está em validação. O código contém uma splash Android
-com fundo monocromático, seguida por animação curta do símbolo em Flutter. A
-animação é ignorada quando a redução de movimento está ativa. Onboarding e
-autenticação ainda não foram implementados.
+A abertura contém splash Android com fundo monocromático, animação Flutter de
+800 ms, bootstrap recuperável, onboarding de três páginas e autenticação
+simulada. A animação é ignorada quando a redução de movimento está ativa.
+
+O onboarding persiste `onboarding_completed`. A autenticação simulada oferece
+login, cadastro, recuperação genérica, restauração de sessão, demonstração e
+logout, persistindo apenas `simulated_session_active`. Nome, e-mail e senha não
+são armazenados. Essa simulação não representa autenticação segura; API real,
+isolamento de usuários e tokens protegidos pertencem ao M4.
+
+A única dependência direta adicionada no M2 é `shared_preferences 2.5.5`, usada
+atrás de abstrações testáveis. Os testes usam implementações em memória e não
+dependem do plugin ou de dados externos.
 
 ## Validação atual
 
-- `dart format`: aprovado;
-- `flutter analyze`: sem problemas;
-- `flutter test`: 12 testes do M3 aprovados em 24/08/2026;
-- `flutter build web`: aprovado.
+- `dart format`: aprovado em 14/09/2026;
+- `flutter analyze`: sem problemas em 14/09/2026;
+- `flutter test`: 37 testes aprovados em 14/09/2026;
+- `flutter build web`: aprovado em 14/09/2026.
 
-Dois testes de abertura foram adicionados, totalizando 14 testes no código, mas
-a suíte atualizada ainda não foi executada. No clone inspecionado em 14/09/2026,
-o SDK Flutter portátil descrito no README da raiz e o Android SDK não estavam
-disponíveis. A splash nativa precisa ser validada em Android real ou emulador.
+O layout foi exercitado automaticamente em 390 × 844, com texto ampliado no
+onboarding e teclado aberto no login, sem overflow. Isso não substitui a
+inspeção manual. Android SDK, `adb`, `sdkmanager` e JDK 17 continuam ausentes;
+por isso o APK, a splash nativa e a transição Android → Flutter permanecem sem
+validação real ou emulada. Termos de uso e política de privacidade também estão
+pendentes de conteúdo e aprovação.

@@ -19,16 +19,18 @@ reais devem ser inspecionadas antes de escrever o cliente.
 
 ## Normalização conhecida
 
-O backend devera normalizar variantes de `residueTypes`, incluindo singular e
-plural de medicamento e seringa. A tabela final somente será definida após
-analisar o conjunto real de valores.
+O backend deverá normalizar variantes de `residueTypes`, incluindo singular e
+plural de medicamento e seringa, e identificar explicitamente a origem de cada
+registro. A tabela final somente será definida após analisar o conjunto real de
+valores.
 
-O campo `schedules` e opcional na prática. Horarios só serão exibidos quando
-houver dados validos. O aplicativo não deduzira estado aberto/fechado.
+O campo `schedules` é opcional na prática. Horários só serão exibidos quando
+houver dados válidos; quando ausentes, o campo será omitido. O aplicativo não
+deduzirá estado aberto/fechado.
 
-IDs no formato `logmed-NNNNNN` identificam farmácias vinculadas ao catalogo
-LogMed e devem ser priorizados ou filtraveis no MVP. Unidades públicas oriundas
-do CNES/DATASUS exigem aviso para confirmar por telefone antes do deslocamento.
+IDs no formato `logmed-NNNNNN` identificam farmácias vinculadas ao catálogo
+LogMed e serão priorizados no MVP. Unidades públicas oriundas do CNES/DATASUS
+exigem aviso para confirmar por telefone antes do deslocamento.
 
 ## Atribuição obrigatória
 
