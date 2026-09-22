@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zelo/app/zelo_app.dart';
@@ -111,7 +113,7 @@ void main() {
     },
   );
 
-  testWidgets('logout limpa sessão e substitui a Home pelo login', (
+  testWidgets('logout existe somente na Conta e identifica sessão simulada', (
     tester,
   ) async {
     final sessionStore = InMemorySessionStore(active: true);
@@ -122,6 +124,17 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('logout-button')), findsNothing);
+    expect(find.text('Sessão simulada'), findsNothing);
+
+    await tester.tap(find.text('Conta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sessão simulada'), findsOneWidget);
+    expect(find.text(SimulatedAuthenticationService.demoEmail), findsNothing);
+    expect(find.byKey(const ValueKey('logout-button')), findsOneWidget);
+
     await tester.tap(find.byKey(const ValueKey('logout-button')));
     await tester.pumpAndSettle();
 
@@ -153,6 +166,63 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Recupere seu acesso'), findsOneWidget);
     await tester.tap(find.byTooltip('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Entre no Zelo'), findsOneWidget);
+  });
+
+  testWidgets('bootstrap inicia enquanto a animação permanece visível', (
+    tester,
+  ) async {
+    final completer = Completer<bool>();
+    final preferences = DeferredOnboardingPreferences(completer);
+    final store = MedicationStore();
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(
+      ZeloApp(
+        medicationStore: store,
+        onboardingPreferences: preferences,
+        authenticationService: SimulatedAuthenticationService(
+          sessionStore: InMemorySessionStore(),
+        ),
+      ),
+    );
+
+    expect(preferences.readCount, 1);
+    expect(find.byKey(const ValueKey('zelo-brand-symbol')), findsOneWidget);
+
+    completer.complete(false);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byKey(const ValueKey('zelo-brand-symbol')), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
+  });
+
+  testWidgets('mostra espera real quando a animação termina primeiro', (
+    tester,
+  ) async {
+    final completer = Completer<bool>();
+    final preferences = DeferredOnboardingPreferences(completer);
+    final store = MedicationStore();
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(
+      ZeloApp(
+        medicationStore: store,
+        onboardingPreferences: preferences,
+        authenticationService: SimulatedAuthenticationService(
+          sessionStore: InMemorySessionStore(),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 801));
+    await tester.pump();
+
+    expect(find.text('Preparando o Zelo…'), findsOneWidget);
+
+    completer.complete(true);
     await tester.pumpAndSettle();
     expect(find.text('Entre no Zelo'), findsOneWidget);
   });

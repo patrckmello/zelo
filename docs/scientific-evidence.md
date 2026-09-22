@@ -51,6 +51,29 @@ Os resultados acima comprovam o comportamento automatizado e a compilação Web,
 mas não comprovam aparência em Android, ausência de quadro branco no dispositivo
 ou usabilidade com participantes.
 
+## Correção técnica do M2
+
+- Data: 21/09/2026
+- Base: commit `579814d` em worktree local, sem novo commit
+- Ambiente: Windows 11, Flutter 3.47.1 e Dart 3.13.1 portáteis
+- Resultado: formatação aprovada, análise sem problemas, 47 testes aprovados e
+  build Web concluído
+- Comportamentos observados por teste: navegação com Início, Descartar,
+  Histórico e Conta; Medicamentos pela Home; logout somente em Conta; sessão
+  simulada sem dados pessoais; histórico vazio; bootstrap paralelo em ambas as
+  ordens de conclusão; redução de movimento; onboarding e regressão do fluxo
+  manual de medicamentos
+- Layout automatizado: 390 × 844 com escala de texto 2 e 320 × 568 com escala
+  1,6, sem exceção de overflow
+- Inspeção visual Web: não realizada; o servidor local iniciou, mas nenhum
+  navegador controlável estava disponível no ambiente de automação
+- Validação Android: não realizada; Android SDK, `adb`, `sdkmanager` e o comando
+  `java` não estavam disponíveis
+
+Esses resultados são evidência técnica automatizada. Eles não comprovam
+reconciliação no Figma, aparência ou transição em Android nem usabilidade com
+participantes.
+
 ## Desempenho da API
 
 | Cenário | Amostras | Mediana | P95 | Observações |
@@ -101,8 +124,8 @@ privacidade e sem armazenar dados pessoais desnecessários.
 ## Limitações
 
 - O armazenamento é somente em memória e volta aos dados iniciais ao reiniciar.
-- Android SDK e JDK 17 indisponíveis; APK, splash e transição nativa não foram
-  validados em dispositivo ou emulador.
+- Android SDK, `adb`, `sdkmanager` e comando `java` indisponíveis; APK, splash e
+  transição nativa não foram validados em dispositivo ou emulador.
 - A autenticação é simulada e persiste somente um marcador booleano. Não há
   proteção de conta, isolamento de usuários, token seguro ou envio de e-mail.
 - Termos de uso e política de privacidade permanecem PENDENTES de conteúdo e

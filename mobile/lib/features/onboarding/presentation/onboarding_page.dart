@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/storage/onboarding_preferences.dart';
+import 'onboarding_illustration.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({
@@ -19,18 +20,18 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   static const _items = <_OnboardingItem>[
     _OnboardingItem(
-      icon: Icons.medication_outlined,
+      visual: OnboardingVisual.organization,
       title: 'Cuide dos seus medicamentos',
       description:
           'Cadastre seus medicamentos e acompanhe suas datas de validade.',
     ),
     _OnboardingItem(
-      icon: Icons.notifications_active_outlined,
+      visual: OnboardingVisual.wastePrevention,
       title: 'Evite desperdícios',
       description: 'Receba alertas antes que seus medicamentos vençam.',
     ),
     _OnboardingItem(
-      icon: Icons.recycling_outlined,
+      visual: OnboardingVisual.responsibleDisposal,
       title: 'Descarte com responsabilidade',
       description: 'Encontre locais próximos para realizar o descarte correto.',
     ),
@@ -215,22 +216,10 @@ class _OnboardingContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Semantics(
-                    label: 'Ilustração: ${item.title}',
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Icon(
-                          item.icon,
-                          size: 76,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ),
+                  OnboardingIllustration(
+                    visual: item.visual,
+                    pageNumber: pageNumber,
+                    semanticLabel: 'Ilustração: ${item.title}',
                   ),
                   const SizedBox(height: 32),
                   Text(
@@ -283,12 +272,12 @@ class _PageIndicatorDot extends StatelessWidget {
 
 class _OnboardingItem {
   const _OnboardingItem({
-    required this.icon,
+    required this.visual,
     required this.title,
     required this.description,
   });
 
-  final IconData icon;
+  final OnboardingVisual visual;
   final String title;
   final String description;
 }

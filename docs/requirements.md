@@ -30,9 +30,9 @@ verificado nesta versão.
 | RF13 | Autenticar usuário por e-mail e senha | Implementado apenas como simulação local |
 | RF14 | Solicitar recuperação de senha | Implementado apenas como confirmação simulada |
 | RF15 | Restaurar uma sessão válida ao reabrir o aplicativo | Implementado com marcador simulado não sensível |
-| RF16 | Encerrar a sessão do usuário | Implementado para a sessão simulada |
+| RF16 | Encerrar a sessão do usuário | Implementado para a sessão simulada, exclusivamente pela Conta |
 | RF17 | Exibir splash nativa com fundo monocromático e logo do Zelo | Pendente de verificação em Android |
-| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Implementado e testado no Flutter; transição Android pendente |
+| RF18 | Exibir animação curta da marca após a inicialização do Flutter | Implementado com somente o símbolo e testado em paralelo ao bootstrap; transição Android pendente |
 | RF19 | Apresentar onboarding no primeiro acesso | Implementado e testado |
 | RF20 | Permitir pular o onboarding e não repeti-lo após sua conclusão | Implementado e testado |
 
@@ -51,6 +51,21 @@ verificado nesta versão.
 - Erros de preferências devem exibir mensagem segura e permitir nova tentativa.
 - Login e logout devem substituir o fluxo raiz, sem retorno às páginas de
   entrada pelo botão Voltar depois da autenticação.
+- A leitura do onboarding e da sessão deve iniciar em paralelo à animação,
+  sem atraso artificial, chamadas duplicadas ou atualização após descarte.
+- A abertura Flutter deve exibir somente o símbolo oficial, sem nome ou slogan.
+
+## Critérios da navegação autenticada
+
+- A barra inferior deve conter Início, Descartar, Histórico e Conta.
+- Medicamentos deve permanecer acessível por “Ver todos” e pelas ações de
+  cadastro da Home, sem destino inferior exclusivo.
+- Descartar deve informar que a consulta de pontos depende da integração
+  EcoMed e não deve fabricar pontos, endereços ou horários.
+- Histórico deve apresentar estado vazio até RF11 e RF12 possuírem persistência
+  real, sem descartes de exemplo tratados como registros.
+- Conta deve identificar a sessão atual como simulada, não exibir dados pessoais
+  inventados e concentrar a única ação de logout da área autenticada.
 
 ## Não funcionais
 
@@ -92,10 +107,10 @@ A regra usa datas civis, sem horário: uma validade anterior à data de referên
 
 ## Estado do fluxo de entrada
 
-A animação Flutter, o bootstrap, o onboarding e a autenticação simulada estão
-implementados e cobertos por testes automatizados. A splash Android continua
-pendente de verificação em dispositivo ou emulador. O fluxo não solicita câmera,
-localização nem notificações.
+A animação Flutter somente com o símbolo, o bootstrap paralelo, o onboarding
+reconciliado e a autenticação simulada estão implementados e cobertos por testes
+automatizados. A splash Android continua pendente de verificação em dispositivo
+ou emulador. O fluxo não solicita câmera, localização nem notificações.
 
 A simulação não armazena senha, nome ou e-mail, não cria JWT e não representa
 autenticação segura. Somente os booleanos `onboarding_completed` e

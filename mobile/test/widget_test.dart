@@ -22,7 +22,7 @@ void main() {
     );
   }
 
-  testWidgets('exibe resumo dinâmico e navega para os medicamentos', (
+  testWidgets('exibe resumo dinâmico e abre medicamentos pela Home', (
     tester,
   ) async {
     final store = MedicationStore.seeded(clock: () => referenceDate);
@@ -35,7 +35,7 @@ void main() {
     expect(find.text('Sua farmácia doméstica'), findsOneWidget);
     expect(find.text('medicamentos cadastrados'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.medication_outlined));
+    await tester.tap(find.text('Ver todos'));
     await tester.pumpAndSettle();
 
     expect(find.text('Dipirona'), findsOneWidget);
@@ -44,6 +44,47 @@ void main() {
     expect(find.text('Válido'), findsOneWidget);
     expect(find.text('Próximo do vencimento'), findsOneWidget);
     expect(find.text('Vencido'), findsOneWidget);
+  });
+
+  testWidgets('exibe quatro destinos sem aba de medicamentos', (tester) async {
+    final store = MedicationStore.seeded(clock: () => referenceDate);
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
+
+    final navigation = find.byType(NavigationBar);
+    for (final label in ['Início', 'Descartar', 'Histórico', 'Conta']) {
+      expect(
+        find.descendant(of: navigation, matching: find.text(label)),
+        findsOneWidget,
+      );
+    }
+    expect(
+      find.descendant(of: navigation, matching: find.text('Medicamentos')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('Descartar é futuro e Histórico inicia vazio', (tester) async {
+    final store = MedicationStore(clock: () => referenceDate);
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Descartar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pontos de descarte'), findsOneWidget);
+    expect(find.textContaining('EcoMed'), findsOneWidget);
+
+    await tester.tap(find.text('Histórico'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhum descarte registrado'), findsOneWidget);
+    expect(
+      find.text('Os descartes registrados aparecerão aqui.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('valida e cadastra medicamento manualmente', (tester) async {
@@ -107,7 +148,7 @@ void main() {
 
     await tester.pumpWidget(authenticatedApp(store));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.medication_outlined));
+    await tester.tap(find.text('Ver todos'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Loratadina'));
     await tester.pumpAndSettle();
@@ -148,7 +189,7 @@ void main() {
 
     await tester.pumpWidget(authenticatedApp(store));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.medication_outlined));
+    await tester.tap(find.text('Ver todos'));
     await tester.pumpAndSettle();
 
     expect(

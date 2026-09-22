@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:zelo/core/storage/onboarding_preferences.dart';
 import 'package:zelo/core/storage/session_store.dart';
 
@@ -56,4 +58,20 @@ class InMemorySessionStore implements SessionStore {
     active = false;
     clearCount++;
   }
+}
+
+class DeferredOnboardingPreferences implements OnboardingPreferences {
+  DeferredOnboardingPreferences(this.completer);
+
+  final Completer<bool> completer;
+  int readCount = 0;
+
+  @override
+  Future<bool> isCompleted() {
+    readCount++;
+    return completer.future;
+  }
+
+  @override
+  Future<void> markCompleted() async {}
 }

@@ -32,7 +32,7 @@ planned or pending.
   bootstrap recuperável, onboarding e autenticação simulada substituível.
 - **Persistido localmente:** somente `onboarding_completed` e o marcador booleano
   não sensível `simulated_session_active`, por meio de `shared_preferences`.
-- **Verificado em 14/09/2026:** formatação, análise estática, 37 testes
+- **Verificado em 21/09/2026:** formatação, análise estática, 47 testes
   automatizados e build Web com Flutter 3.47.1/Dart 3.13.1.
 - **Pendente no ambiente atual:** Android SDK, JDK 17 e dispositivo/emulador para
   validar a splash nativa e a transição Android → Flutter.
@@ -44,24 +44,37 @@ planned or pending.
 
 ~~~text
 Splash nativa estática
-→ animação curta da marca
-→ bootstrap recuperável
+→ primeira renderização Flutter
+  ├─ animação curta do símbolo
+  └─ bootstrap recuperável em paralelo
 → verificar primeiro acesso
 → onboarding, quando necessário
 → verificar sessão
 → login ou página inicial
 ~~~
 
-A splash usa fundo monocromático e o símbolo do Zelo. A animação de 800 ms
-explora o movimento circular da seta e é ignorada quando o sistema solicita
-redução de movimento. O onboarding apresenta organização, prevenção de
-desperdício e descarte responsável. Câmera, localização e notificações não são
-solicitadas nesse fluxo.
+A splash usa fundo monocromático e o símbolo do Zelo. A animação Flutter de
+800 ms exibe somente o símbolo oficial e ocorre em paralelo à leitura do
+onboarding e da sessão. Se a leitura ainda estiver em andamento ao fim da
+animação, o aplicativo mostra o carregamento real e discreto; não há espera
+artificial. A animação é ignorada quando o sistema solicita redução de
+movimento.
+
+O onboarding apresenta organização, prevenção de desperdício e descarte
+responsável por meio de composições vetoriais simples e do ativo oficial, sem
+redesenhar a marca. Câmera, localização e notificações não são solicitadas
+nesse fluxo.
 
 A autenticação desta versão é deliberadamente simulada. Login, cadastro,
 recuperação, restauração de sessão e logout exercitam a interface e a navegação,
 mas não representam proteção de conta. Nenhuma senha, nome ou e-mail é
 persistido; o aplicativo salva apenas um booleano de sessão de demonstração.
+
+A navegação autenticada possui **Início**, **Descartar**, **Histórico** e
+**Conta**. Medicamentos continua acessível por “Ver todos” e pelas ações de
+cadastro da Home, sem aba exclusiva. Descartar informa que a EcoMed ainda será
+integrada; Histórico permanece sem persistência real e inicia vazio; Conta
+identifica a sessão simulada, não exibe dados pessoais e concentra o logout.
 
 ## Tecnologias planejadas
 
@@ -154,10 +167,11 @@ cd mobile
 ```
 
 O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A suíte
-possui 37 testes aprovados em 14/09/2026. Ela cobre a abertura, redução de
-movimento, bootstrap, onboarding, autenticação simulada, navegação autenticada,
-responsividade essencial e o fluxo de medicamentos. Os dados dos medicamentos
-permanecem somente em memória e são reiniciados quando o aplicativo é fechado.
+possui 47 testes aprovados em 21/09/2026. Ela cobre a abertura, redução de
+movimento, bootstrap paralelo, onboarding, autenticação simulada, os quatro
+destinos autenticados, acesso a Medicamentos pela Home, responsividade essencial
+e o fluxo manual de medicamentos. Os dados dos medicamentos permanecem somente
+em memória e são reiniciados quando o aplicativo é fechado.
 
 ## Próximos passos
 
