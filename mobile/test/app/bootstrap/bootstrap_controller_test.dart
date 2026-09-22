@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zelo/app/bootstrap/bootstrap_controller.dart';
 import 'package:zelo/features/authentication/data/simulated_authentication_service.dart';
@@ -68,5 +70,46 @@ void main() {
     await controller.load();
     expect(controller.state, BootstrapState.unauthenticated);
     expect(preferences.readCount, 2);
+  });
+
+  test(
+    'compartilha a leitura enquanto o bootstrap está em andamento',
+    () async {
+      final completer = Completer<bool>();
+      final preferences = DeferredOnboardingPreferences(completer);
+      final controller = BootstrapController(
+        onboardingPreferences: preferences,
+        authenticationService: SimulatedAuthenticationService(
+          sessionStore: InMemorySessionStore(),
+        ),
+      );
+      addTearDown(controller.dispose);
+
+      final firstLoad = controller.load();
+      final secondLoad = controller.load();
+
+      expect(identical(firstLoad, secondLoad), isTrue);
+      expect(preferences.readCount, 1);
+
+      completer.complete(false);
+      await firstLoad;
+      expect(controller.state, BootstrapState.firstAccess);
+    },
+  );
+
+  test('ignora conclusão pendente depois do descarte', () async {
+    final completer = Completer<bool>();
+    final controller = BootstrapController(
+      onboardingPreferences: DeferredOnboardingPreferences(completer),
+      authenticationService: SimulatedAuthenticationService(
+        sessionStore: InMemorySessionStore(),
+      ),
+    );
+
+    final load = controller.load();
+    controller.dispose();
+    completer.complete(false);
+
+    await expectLater(load, completes);
   });
 }

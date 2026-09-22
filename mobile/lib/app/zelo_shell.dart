@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../features/account/presentation/account_page.dart';
+import '../features/collection_points/presentation/collection_points_page.dart';
+import '../features/disposal_history/presentation/disposal_history_page.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/medications/application/medication_store.dart';
 import '../features/medications/domain/medication.dart';
@@ -32,14 +35,19 @@ class _ZeloShellState extends State<ZeloShell> {
       label: 'Início',
     ),
     NavigationDestination(
-      icon: Icon(Icons.medication_outlined),
-      selectedIcon: Icon(Icons.medication),
-      label: 'Medicamentos',
+      icon: Icon(Icons.recycling_outlined),
+      selectedIcon: Icon(Icons.recycling),
+      label: 'Descartar',
     ),
     NavigationDestination(
-      icon: Icon(Icons.location_on_outlined),
-      selectedIcon: Icon(Icons.location_on),
-      label: 'Descarte',
+      icon: Icon(Icons.history_outlined),
+      selectedIcon: Icon(Icons.history),
+      label: 'Histórico',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.account_circle_outlined),
+      selectedIcon: Icon(Icons.account_circle),
+      label: 'Conta',
     ),
   ];
 
@@ -52,16 +60,14 @@ class _ZeloShellState extends State<ZeloShell> {
           HomePage(
             medicationStore: widget.medicationStore,
             onAddMedication: _openMedicationForm,
-            onOpenMedications: () => _selectDestination(1),
-            onOpenDisposal: () => _selectDestination(2),
+            onOpenMedications: _openMedications,
+            onOpenDisposal: () => _selectDestination(1),
+          ),
+          const CollectionPointsPage(),
+          const DisposalHistoryPage(),
+          AccountPage(
             onLogout: widget.onLogout,
             isLoggingOut: widget.isLoggingOut,
-          ),
-          MedicationsPage(store: widget.medicationStore),
-          const _PlaceholderPage(
-            icon: Icons.location_on_outlined,
-            title: 'Pontos de descarte',
-            message: 'A consulta à EcoMed será integrada em uma etapa futura.',
           ),
         ],
       ),
@@ -77,6 +83,12 @@ class _ZeloShellState extends State<ZeloShell> {
     setState(() => _selectedIndex = index);
   }
 
+  Future<void> _openMedications() => Navigator.of(context).push<void>(
+    MaterialPageRoute(
+      builder: (_) => MedicationsPage(store: widget.medicationStore),
+    ),
+  );
+
   Future<void> _openMedicationForm() async {
     final draft = await Navigator.of(context).push<MedicationDraft>(
       MaterialPageRoute(builder: (_) => const MedicationFormPage()),
@@ -89,50 +101,6 @@ class _ZeloShellState extends State<ZeloShell> {
     final medication = widget.medicationStore.add(draft);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${medication.name} foi cadastrado.')),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  const _PlaceholderPage({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 20),
-                Text(title, style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

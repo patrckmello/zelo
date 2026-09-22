@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/zelo_colors.dart';
-
 class BrandIntroPage extends StatefulWidget {
   const BrandIntroPage({
     required this.onFinished,
@@ -70,33 +68,15 @@ class _BrandIntroPageState extends State<BrandIntroPage>
             opacity: _fade,
             child: ScaleTransition(
               scale: _scale,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RotationTransition(
-                    turns: _turns,
-                    child: Image.asset(
-                      'assets/branding/zelo-symbol.png',
-                      key: const ValueKey('zelo-brand-symbol'),
-                      width: 144,
-                      height: 144,
-                      semanticLabel: 'Símbolo do Zelo',
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Zelo',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: ZeloColors.petroleumBlue,
-                      fontSize: 38,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Cuide. Organize. Descarte certo.',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
+              child: RotationTransition(
+                turns: _turns,
+                child: Image.asset(
+                  'assets/branding/zelo-symbol.png',
+                  key: const ValueKey('zelo-brand-symbol'),
+                  width: 144,
+                  height: 144,
+                  semanticLabel: 'Símbolo do Zelo',
+                ),
               ),
             ),
           ),

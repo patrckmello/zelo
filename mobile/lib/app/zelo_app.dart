@@ -7,7 +7,7 @@ import '../features/authentication/data/simulated_authentication_service.dart';
 import '../features/authentication/domain/authentication_service.dart';
 import '../features/medications/application/medication_store.dart';
 import 'bootstrap/app_bootstrap_flow.dart';
-import 'bootstrap/brand_intro_page.dart';
+import 'bootstrap/app_launch_flow.dart';
 
 class ZeloApp extends StatefulWidget {
   const ZeloApp({
@@ -32,12 +32,10 @@ class _ZeloAppState extends State<ZeloApp> {
   late final OnboardingPreferences _onboardingPreferences;
   late final AuthenticationService _authenticationService;
   late final bool _ownsMedicationStore;
-  late bool _showBrandIntro;
 
   @override
   void initState() {
     super.initState();
-    _showBrandIntro = widget.showBrandIntro;
     _ownsMedicationStore = widget.medicationStore == null;
     _medicationStore = widget.medicationStore ?? MedicationStore.seeded();
     _onboardingPreferences =
@@ -64,19 +62,14 @@ class _ZeloAppState extends State<ZeloApp> {
       title: 'Zelo',
       debugShowCheckedModeBanner: false,
       theme: ZeloTheme.light,
-      home: _showBrandIntro
-          ? BrandIntroPage(
-              onFinished: () {
-                if (mounted) {
-                  setState(() => _showBrandIntro = false);
-                }
-              },
-            )
-          : AppBootstrapFlow(
-              onboardingPreferences: _onboardingPreferences,
-              authenticationService: _authenticationService,
-              medicationStore: _medicationStore,
-            ),
+      home: AppLaunchFlow(
+        showBrandIntro: widget.showBrandIntro,
+        child: AppBootstrapFlow(
+          onboardingPreferences: _onboardingPreferences,
+          authenticationService: _authenticationService,
+          medicationStore: _medicationStore,
+        ),
+      ),
     );
   }
 }

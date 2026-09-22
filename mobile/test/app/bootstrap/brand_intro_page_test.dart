@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zelo/app/bootstrap/brand_intro_page.dart';
 
 void main() {
-  testWidgets('exibe a marca e conclui a animação automaticamente', (
+  testWidgets('exibe somente o símbolo e conclui a animação automaticamente', (
     tester,
   ) async {
     var completionCount = 0;
@@ -18,7 +18,8 @@ void main() {
     );
 
     expect(find.byKey(const ValueKey('zelo-brand-symbol')), findsOneWidget);
-    expect(find.text('Cuide. Organize. Descarte certo.'), findsOneWidget);
+    expect(find.text('Zelo'), findsNothing);
+    expect(find.text('Cuide. Organize. Descarte certo.'), findsNothing);
     expect(completionCount, 0);
 
     await tester.pumpAndSettle();

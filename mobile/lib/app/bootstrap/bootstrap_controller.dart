@@ -24,9 +24,28 @@ class BootstrapController extends ChangeNotifier {
   final AuthenticationService authenticationService;
 
   BootstrapState _state = BootstrapState.initializing;
+  Future<void>? _loadInFlight;
+  bool _disposed = false;
+
   BootstrapState get state => _state;
 
-  Future<void> load() async {
+  Future<void> load() {
+    final activeLoad = _loadInFlight;
+    if (activeLoad != null) {
+      return activeLoad;
+    }
+
+    late final Future<void> operation;
+    operation = _performLoad().whenComplete(() {
+      if (identical(_loadInFlight, operation)) {
+        _loadInFlight = null;
+      }
+    });
+    _loadInFlight = operation;
+    return operation;
+  }
+
+  Future<void> _performLoad() async {
     _setState(BootstrapState.initializing);
     try {
       final onboardingCompleted = await onboardingPreferences.isCompleted();
@@ -47,7 +66,16 @@ class BootstrapController extends ChangeNotifier {
   }
 
   void _setState(BootstrapState value) {
+    if (_disposed) {
+      return;
+    }
     _state = value;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
