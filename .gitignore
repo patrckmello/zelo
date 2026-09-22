@@ -40,6 +40,7 @@ Thumbs.db
 
 # Toolchains portáteis locais
 .tools/
+.worktrees/
 
 # Evidencias geradas localmente
 artifacts/
