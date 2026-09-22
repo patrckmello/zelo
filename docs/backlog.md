@@ -50,6 +50,15 @@ Estado: em andamento.
 - [x] restaurar sessão simulada e disponibilizar logout;
 - [x] disponibilizar entrada de demonstração com fixture pública fictícia;
 - [x] testar primeiro acesso, retorno ao aplicativo e rotas autenticadas;
+- [x] iniciar o bootstrap em paralelo à animação, sem espera artificial;
+- [x] usar somente o símbolo oficial na animação Flutter;
+- [x] reconciliar a navegação para Início, Descartar, Histórico e Conta;
+- [x] manter Medicamentos acessível pela Home, sem aba exclusiva;
+- [x] mover o logout para Conta e identificar a sessão simulada sem dados
+  pessoais;
+- [x] adicionar estados honestos para pontos futuros e histórico vazio;
+- [x] substituir os círculos genéricos do onboarding por composições visuais
+  com o ativo oficial e elementos vetoriais simples;
 - [ ] fornecer e aprovar os textos dos termos de uso e da política de
   privacidade;
 - [ ] validar visualmente em Android real ou emulador, inclusive Android 12+.
@@ -58,10 +67,12 @@ A interface usa autenticação simulada substituível e persiste somente um marc
 booleano não sensível. Autenticação real, isolamento de usuários, armazenamento
 seguro de tokens e recuperação efetiva serão concluídos no M4.
 
-Validação em 14/09/2026: o Flutter portátil foi restaurado; formatação, análise,
-37 testes e build Web foram aprovados. O M2 permanece **em andamento** porque a
-validação Android, a reconciliação visual no Figma e os textos jurídicos seguem
-pendentes.
+Validação em 21/09/2026: o Flutter portátil foi restaurado; formatação, análise,
+47 testes e build Web foram aprovados. O layout foi exercitado por testes em
+390 × 844, 320 × 568 e com texto ampliado. A inspeção visual interativa Web
+não foi realizada porque o ambiente de automação não disponibilizou navegador
+controlável. O M2 permanece **em andamento** porque a validação Android, a
+reconciliação visual no Figma e os textos jurídicos seguem pendentes.
 
 ## M3 - Fluxo manual simulado
 

@@ -82,8 +82,8 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 - Decisão: usar splash nativa estática seguida de animação curta executada pelo
   Flutter, aproveitando o movimento circular da seta de devolução.
 - Implementação: usar o PNG oficial disponível com opacidade, escala
-  e rotação por 800 ms, sem dependência externa. Quando a redução de movimento
-  está ativa, a animação é ignorada.
+  e rotação por 800 ms, sem dependência externa, nome ou slogan. Quando a
+  redução de movimento está ativa, a animação é ignorada.
 - Rive não foi adicionado porque o repositório ainda não contém a fonte vetorial
   da marca. A alternativa poderá ser reavaliada quando esse arquivo existir.
 - Restrição: a animação não deve simular carregamento inexistente nem atrasar
@@ -128,6 +128,9 @@ será marcada como aceita quando confirmada ou aplicada e validada.
   injetável, sem biblioteca adicional de rotas ou gerenciamento de estado.
 - Navegação: trocar o conteúdo da rota raiz ao autenticar ou sair. Assim, Voltar
   não reabre splash, onboarding ou login após a autenticação.
+- Inicialização: montar o bootstrap sob a animação desde o primeiro quadro,
+  compartilhar cargas concorrentes e ignorar conclusões após o descarte. A
+  animação define somente o tempo mínimo de identidade; não simula carregamento.
 - Recuperação: falhas de leitura mostram mensagem segura e ação Tentar novamente.
 
 ## D016 - Autenticação simulada e armazenamento mínimo
@@ -188,3 +191,26 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 - Decisão: usar azul-petróleo como cor primária interativa e manter o verde como
   cor secundária/de marca. O contraste medido do azul-petróleo sobre o fundo
   claro é 8,77:1; o verde original como texto sobre branco tinha cerca de 3,01:1.
+
+## D023 - Navegação autenticada definitiva
+
+- Estado: aceita
+- Decisão: usar Início, Descartar, Histórico e Conta como os quatro destinos da
+  barra inferior.
+- Medicamentos: abrir a lista como rota a partir da Home e manter ali as ações
+  de cadastro, sem criar aba exclusiva.
+- Sessão: concentrar o logout em Conta e identificar toda sessão atual como
+  simulada, pois o marcador booleano não distingue login, cadastro e entrada de
+  demonstração. Nenhum dado pessoal deve ser inventado.
+- Limites: Descartar continua futuro até a integração EcoMed; Histórico mostra
+  estado vazio e não representa RF11 ou RF12 como implementados.
+
+## D024 - Reconciliação visual local do M2
+
+- Estado: aceita para a implementação Flutter; Figma e Android permanecem
+  pendentes
+- Decisão: manter somente o símbolo oficial na abertura e substituir os ícones
+  isolados em círculos do onboarding por composições feitas com o ativo oficial,
+  formas, superfícies e ícones Material.
+- Restrição: não adicionar ativos externos, redesenhar a marca ou solicitar
+  permissões no onboarding.

@@ -3,10 +3,11 @@
 ## Estado
 
 A separação de responsabilidades está confirmada. O fluxo manual de
-medicamentos, a animação Flutter, o bootstrap, o onboarding e a autenticação
-simulada foram implementados e validados por testes. A splash Android ainda
-depende de validação no dispositivo; backend, autenticação real, persistência de
-medicamentos e integração EcoMed permanecem planejados.
+medicamentos, a animação Flutter, o bootstrap paralelo, o onboarding, a
+autenticação simulada e a navegação autenticada com quatro destinos foram
+implementados e validados por testes. A splash Android ainda depende de
+validação no dispositivo; backend, autenticação real, persistência de
+medicamentos, histórico de descartes e integração EcoMed permanecem planejados.
 
 ## Visão de contexto
 
@@ -32,31 +33,34 @@ limite compartilhado de requisições.
 
 ~~~text
 Splash nativa estática
-→ animação Flutter curta
-→ bootstrap centralizado
-→ leitura de onboarding_completed
-→ onboarding, se for primeiro acesso
-→ leitura de simulated_session_active
-→ login ou shell autenticada
+→ primeira renderização Flutter
+  ├─ animação curta do símbolo
+  └─ bootstrap centralizado em paralelo
+       ├─ leitura de onboarding_completed
+       └─ leitura de simulated_session_active, quando aplicável
+→ onboarding, login, shell autenticada ou erro recuperável
 ~~~
 
 A splash nativa cobre o período anterior à primeira renderização do Flutter.
-A animação da marca pertence à camada Flutter e não bloqueia operações reais de
-inicialização. O estado de conclusão do onboarding não é sensível e é persistido
-localmente. A sessão do M2 é apenas um booleano de demonstração e não equivale a
-um token. Tokens reais são sensíveis e deverão usar armazenamento seguro no M4.
+A animação da marca pertence à camada Flutter. `AppLaunchFlow` mantém
+`AppBootstrapFlow` montado sob a abertura para que as leituras comecem no
+primeiro quadro, sem bloqueio ou atraso artificial. O estado de conclusão do
+onboarding não é sensível e é persistido localmente. A sessão do M2 é apenas um
+booleano de demonstração e não equivale a um token. Tokens reais são sensíveis
+e deverão usar armazenamento seguro no M4.
 
 ### Abertura implementada
 
 O Android usa `LaunchTheme` com fundo `#F4F7F6` e o símbolo da marca em um
-recurso nativo. A primeira tela Flutter mantém o mesmo fundo, anima o PNG por
-800 ms e então entrega o controle ao bootstrap. Com redução de movimento ativa,
-a tela chama a conclusão no primeiro quadro e não executa a animação.
+recurso nativo. A primeira tela Flutter mantém o mesmo fundo e anima somente o
+PNG oficial por 800 ms, sem nome ou slogan. Com redução de movimento ativa, a
+tela chama a conclusão no primeiro quadro e não executa a animação.
 
 ~~~text
 LaunchTheme Android
-  → BrandIntroPage Flutter
-    → BootstrapController
+  → AppLaunchFlow
+    ├─ BrandIntroPage Flutter
+    └─ BootstrapController em paralelo
       ├─ primeiro acesso → OnboardingPage
       ├─ sem sessão → LoginPage
       ├─ sessão simulada → ZeloShell
@@ -64,10 +68,11 @@ LaunchTheme Android
 ~~~
 
 `BootstrapController` depende apenas de `OnboardingPreferences` e
-`AuthenticationService`, recebidos por construtor. O estado de erro não expõe a
-exceção interna e permite repetir a leitura. Login, cadastro, logout e conclusão
-do onboarding substituem o conteúdo da rota raiz, impedindo retorno indevido ao
-fluxo anterior.
+`AuthenticationService`, recebidos por construtor. Enquanto uma carga está em
+andamento, chamadas adicionais compartilham a mesma operação; conclusões após
+`dispose` são ignoradas. O estado de erro não expõe a exceção interna e permite
+repetir a leitura. Login, cadastro, logout e conclusão do onboarding substituem
+o conteúdo da rota raiz, impedindo retorno indevido ao fluxo anterior.
 
 ### Preferências e autenticação simulada
 
@@ -108,6 +113,7 @@ lib/
 |   |-- theme/
 |   `-- widgets/
 |-- features/
+|   |-- account/
 |   |-- onboarding/
 |   |-- authentication/
 |   |-- medications/
@@ -119,6 +125,18 @@ lib/
 
 As subcamadas são criadas quando uma funcionalidade realmente precisa delas.
 Isso reduz cerimônia para uma equipe de duas pessoas.
+
+### Navegação autenticada
+
+`ZeloShell` mantém quatro áreas em um `IndexedStack` e uma única
+`NavigationBar`: Início, Descartar, Histórico e Conta. Descartar ainda informa a
+dependência da EcoMed sem fabricar pontos; Histórico apresenta estado vazio sem
+persistência; Conta identifica a sessão simulada, não exibe dados pessoais e
+contém o logout.
+
+Medicamentos não pertence à barra inferior. A Home abre `MedicationsPage` como
+rota por “Ver todos”, e as ações de cadastro continuam usando o mesmo formulário
+e o mesmo `MedicationStore`.
 
 ### Fluxo de medicamentos implementado
 
