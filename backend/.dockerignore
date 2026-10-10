@@ -1,0 +1,10 @@
+.venv
+.env
+.env.*
+!.env.example
+.outbox
+.pytest_cache
+.ruff_cache
+**/__pycache__
+*.db
+tests

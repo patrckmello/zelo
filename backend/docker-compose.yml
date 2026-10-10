@@ -1,0 +1,44 @@
+# Ambiente local: PostgreSQL + API Zelo.
+# Uso: na pasta backend/, com o arquivo .env preenchido, execute
+#   docker compose up --build
+name: zelo
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: zelo
+      POSTGRES_USER: zelo
+      POSTGRES_PASSWORD: ${ZELO_DB_PASSWORD:?Defina ZELO_DB_PASSWORD em backend/.env}
+    volumes:
+      - zelo-db:/var/lib/postgresql/data
+    ports:
+      # Porta do host configurável; 5433 evita conflito com um PostgreSQL local.
+      - "127.0.0.1:${ZELO_DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zelo -d zelo"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  api:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      ZELO_DATABASE_URL: postgresql+psycopg://zelo:${ZELO_DB_PASSWORD}@db:5432/zelo
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Acessível na rede local para testes em um celular Android físico.
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  zelo-db:
