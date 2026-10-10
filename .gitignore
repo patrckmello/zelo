@@ -25,6 +25,8 @@ coverage/
 
 # Python
 __pycache__/
+*.db
+backend/.outbox/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
