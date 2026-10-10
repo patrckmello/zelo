@@ -3,96 +3,107 @@
 > Cuide. Organize. Descarte certo.
 
 O Zelo é um projeto acadêmico da disciplina de Projeto e Desenvolvimento de
-Sistemas Móveis da CESUCA. O aplicativo apoiará a organização de medicamentos
-armazenados em casa, o acompanhamento de validade e a localização de pontos de
-descarte responsável.
+Sistemas Móveis da CESUCA. O aplicativo apoia a organização de medicamentos
+armazenados em casa, o acompanhamento de validade, a localização de pontos de
+descarte responsável e o registro dos descartes realizados.
 
-O projeto está no início do desenvolvimento e será apresentado na Mostra
-Científica da instituição. Funcionalidades planejadas não devem ser tratadas
-como resultados comprovados.
+O projeto será apresentado na Mostra Científica da instituição. Funcionalidades
+planejadas não devem ser tratadas como resultados comprovados.
 
 ## English summary
 
 Zelo is an academic mobile application project from CESUCA focused on helping
-people organize medicines stored at home, monitor expiration dates, and find
-appropriate collection points for responsible disposal. The Android-first MVP
-uses Flutter and Dart, supported in the future by a dedicated backend that
-protects the EcoMed API key and provides normalized, cached collection-point
-data. The repository includes an in-memory medication flow plus a three-page
-onboarding and replaceable simulated authentication. Real authentication,
-backend persistence, EcoMed integration, and Android device validation remain
-planned or pending.
+people organize medicines stored at home, monitor expiration dates, find
+appropriate collection points and record responsible disposals. The
+Android-first app uses Flutter and Dart. A FastAPI backend with PostgreSQL now
+provides real authentication, profile management and account deletion,
+per-user medications, disposal history, assisted package reading (server-side
+Tesseract OCR, always confirmed by the user) and an EcoMed client that keeps
+the API key on the server and was checked against live responses. The app runs
+either in a local demo mode (simulated session, in-memory data) or connected
+to the API. Android device validation and usability evaluation remain
+pending.
 
 ## Estado atual
 
 - **Confirmado:** Flutter/Dart, Android como prioridade, API própria e uso
-  autorizado da API EcoMed por meio do backend.
-- **Implementado e verificado:** repositório, documentação, scaffold Flutter,
-  tema Material 3, fluxo manual de medicamentos em memória, animação Flutter,
-  bootstrap recuperável, onboarding e autenticação simulada substituível.
-- **Persistido localmente:** somente `onboarding_completed` e o marcador booleano
-  não sensível `simulated_session_active`, por meio de `shared_preferences`.
-- **Verificado em 21/09/2026:** formatação, análise estática, 47 testes
-  automatizados e build Web com Flutter 3.47.1/Dart 3.13.1.
-- **Pendente no ambiente atual:** Android SDK, JDK 17 e dispositivo/emulador para
-  validar a splash nativa e a transição Android → Flutter.
-- **Planejado para o M4:** autenticação real, isolamento entre usuários,
-  armazenamento seguro de tokens, backend e persistência de medicamentos.
-- **Fora do núcleo inicial:** OCR e mapa embutido.
+  autorizado da API EcoMed somente por meio do backend.
+- **Implementado e verificado (02 e 03/10/2026):**
+  - interface redesenhada com design system próprio (Poppins, tokens de cor
+    com contraste AA, superfícies tonais) e assinatura visual da validade
+    (carimbo `VAL`, faixa de situação e linha de validade);
+  - backend FastAPI + PostgreSQL com autenticação real, medicamentos isolados
+    por conta, recuperação de senha por código, descartes e histórico;
+  - cliente EcoMed no backend, validado com respostas reais em 03/10/2026,
+    com cache por coordenadas arredondadas, limite local de 60 req/min e
+    normalização;
+  - aplicativo nos modos **demonstração** e **conectado**, com token de
+    renovação em armazenamento seguro, busca de pontos por localização
+    aproximada (com tempo-limite) ou região e abertura do ponto em aplicativo
+    de mapas;
+  - Meu perfil (nome, e-mail, senha) e exclusão da conta com todos os dados;
+  - leitura da embalagem por foto (OCR no servidor), que só preenche o
+    cadastro para a pessoa conferir;
+  - lembretes de validade locais (30 dias antes, 7 dias antes e no dia, às 9h),
+    ligados pela pessoa em Conta, só no aplicativo Android;
+  - abertura com nome e slogan, onboarding com cenas animadas e celebrações
+    no cadastro (carimbo de validade) e no descarte (trajeto que varre a tela,
+    inspirado no Strava).
+- **Validações executadas (03/10/2026):** 151 testes Flutter, 57 testes do
+  backend, lint, build Web nos dois modos, Docker Compose com PostgreSQL,
+  teste de contrato do app contra a API real, login e leitura de embalagem em
+  navegador real (Edge) e medição da EcoMed em 12 municípios da RMPA.
+- **Pendente:** validação em dispositivo Android (o APK de debug já é gerado), provedor de
+  e-mail para recuperação de senha, notificações de validade, avaliação da
+  leitura com fotos reais, textos jurídicos, reconciliação no Figma e
+  avaliação com participantes.
+- **Fora do núcleo inicial:** mapa embutido.
 
-## Fluxo inicial implementado
+## Como funciona
 
 ~~~text
-Splash nativa estática
-→ primeira renderização Flutter
-  ├─ animação curta do símbolo
-  └─ bootstrap recuperável em paralelo
-→ verificar primeiro acesso
-→ onboarding, quando necessário
-→ verificar sessão
-→ login ou página inicial
+Splash nativa → animação do símbolo (bootstrap em paralelo)
+→ onboarding no primeiro acesso → login, cadastro ou recuperação
+→ Início | Descartar | Histórico | Conta
 ~~~
 
-A splash usa fundo monocromático e o símbolo do Zelo. A animação Flutter de
-800 ms exibe somente o símbolo oficial e ocorre em paralelo à leitura do
-onboarding e da sessão. Se a leitura ainda estiver em andamento ao fim da
-animação, o aplicativo mostra o carregamento real e discreto; não há espera
-artificial. A animação é ignorada quando o sistema solicita redução de
-movimento.
+- **Início:** painel da farmácia com a data de referência, barra de composição
+  por situação, itens que precisam de atenção e ações rápidas (cadastrar,
+  escanear embalagem no modo conectado e encontrar ponto de descarte).
+- **Medicamentos:** lista com filtros por situação, detalhe com linha de
+  validade, cadastro e edição com prévia da situação; no modo conectado, o
+  cadastro pode ser preenchido pela foto da embalagem, sempre com conferência.
+- **Descartar:** vencidos separados, registro de descarte e busca de pontos
+  (farmácias LogMed primeiro; demais pontos com aviso para confirmar por
+  telefone; atribuição EcoMed sempre visível). Se a localização não chegar,
+  a tela oferece escolher uma região; aberta pela Início, volta a ela.
+- **Histórico:** descartes registrados com local, data e itens.
+- **Conta:** identificação da sessão, Meu perfil (modo conectado),
+  informações do projeto, licenças e saída.
 
-O onboarding apresenta organização, prevenção de desperdício e descarte
-responsável por meio de composições vetoriais simples e do ativo oficial, sem
-redesenhar a marca. Câmera, localização e notificações não são solicitadas
-nesse fluxo.
+Modo demonstração (padrão): sessão simulada, dados fictícios em memória e
+nenhuma consulta de pontos. Modo conectado: compile o app com
+`--dart-define=ZELO_API_URL=<url da API>`.
 
-A autenticação desta versão é deliberadamente simulada. Login, cadastro,
-recuperação, restauração de sessão e logout exercitam a interface e a navegação,
-mas não representam proteção de conta. Nenhuma senha, nome ou e-mail é
-persistido; o aplicativo salva apenas um booleano de sessão de demonstração.
+## Tecnologias
 
-A navegação autenticada possui **Início**, **Descartar**, **Histórico** e
-**Conta**. Medicamentos continua acessível por “Ver todos” e pelas ações de
-cadastro da Home, sem aba exclusiva. Descartar informa que a EcoMed ainda será
-integrada; Histórico permanece sem persistência real e inicia vazio; Conta
-identifica a sessão simulada, não exibe dados pessoais e concentra o logout.
-
-## Tecnologias planejadas
-
-- Aplicativo: Flutter, Dart e Material 3;
-- Preferências locais não sensíveis: `shared_preferences 2.5.5`;
-- Backend: Python, FastAPI, SQLAlchemy e Alembic;
-- Dados: PostgreSQL;
+- Aplicativo: Flutter 3.47.1, Dart 3.13.1, Material 3 e Poppins (SIL OFL 1.1);
+- Pacotes do app: `shared_preferences`, `http`, `flutter_secure_storage`,
+  `geolocator`, `url_launcher`, `image_picker` e `flutter_local_notifications`;
+- Backend: Python 3.13, FastAPI, SQLAlchemy 2.1, Alembic, Argon2, PyJWT,
+  Pillow e OCR com RapidOCR (modelos PP-OCRv6, ONNX) e Tesseract 5 como
+  reserva, na imagem Docker;
+- Dados: PostgreSQL 17;
 - Infraestrutura local: Docker Compose;
-- Plataforma prioritária: Android;
-- Desenvolvimento: Visual Studio Code e Git.
+- Plataforma prioritária: Android.
 
 ## Estrutura
 
 ```text
 Zelo/
 |-- mobile/       # Aplicativo Flutter
-|-- backend/      # API própria (implementação futura)
-|-- docs/         # Arquitetura, requisitos, decisões e evidências
+|-- backend/      # API Zelo (FastAPI, PostgreSQL, Docker Compose)
+|-- docs/         # Arquitetura, requisitos, decisões, testes e evidências
 |-- AGENTS.md     # Regras obrigatórias para agentes
 |-- README.md
 `-- Zelo_Documentacao_Inicial.docx
@@ -100,88 +111,100 @@ Zelo/
 
 ## Documentação viva
 
-Código, decisões e documentação devem evoluir juntos. Toda mudança de requisito,
-escopo, arquitetura, integração, teste ou estado de implementação deverá
-atualizar os arquivos relacionados no mesmo ciclo de trabalho. As regras
-obrigatórias estão em [AGENTS.md](AGENTS.md).
+Código, decisões e documentação evoluem juntos. Toda mudança de requisito,
+escopo, arquitetura, integração, teste ou estado de implementação atualiza os
+arquivos relacionados no mesmo ciclo de trabalho. As regras obrigatórias estão
+em [AGENTS.md](AGENTS.md); o design system está em
+[docs/design-system.md](docs/design-system.md).
 
 ## Pré-requisitos
 
-Para o aplicativo:
-
 - Git;
-- Flutter SDK estável, com Dart incluído;
-- Android Studio ou Android SDK com platform-tools;
-- JDK 17;
-- Visual Studio Code com extensões Flutter e Dart.
-
-Para o backend, quando ele for iniciado:
-
-- Python 3.12 ou versão validada pelo projeto;
-- Docker Desktop com Docker Compose, preferencialmente.
-
-Depois de instalar o ambiente Android, execute:
-
-```powershell
-flutter doctor -v
-flutter doctor --android-licenses
-```
+- Flutter SDK estável (o SDK portátil fica em `.tools/flutter`, não versionado);
+- Docker Desktop com Docker Compose (backend);
+- Python 3.13 (opcional, para rodar o backend fora do Docker);
+- JDK 17 e Android SDK (plataforma 36, build-tools 36, NDK 28.2); neste
+  ambiente ficam em `.tools/jdk-17` e `.tools/android-sdk`, fora do Git
+  (D041).
 
 ## Variáveis de ambiente
 
-Segredos nunca devem ser versionados. A futura chave EcoMed permanecerá apenas
-no backend, em arquivo `.env` local ignorado pelo Git. O repositório fornecerá
-somente um `.env.example` sem valores secretos quando o backend for criado.
+Segredos nunca são versionados. O backend lê `backend/.env` (modelo em
+`backend/.env.example`). A chave EcoMed fica **somente** nesse arquivo:
 
-Não envie a chave EcoMed pelo aplicativo Flutter, pelo chat, por commits ou por
-logs. O contrato real da API deverá ser inspecionado antes da implementação.
+```text
+ECOMED_API_KEY=<sua chave>
+```
 
-## Como executar o aplicativo
+Não envie a chave pelo aplicativo, pelo chat, por commits ou por logs.
 
-O SDK Flutter portátil restaurado deve ficar em `.tools/flutter` e não é
-versionado. Com ele, execute pela raiz do repositório:
+## Como executar
+
+Backend (na pasta `backend/`, detalhes em [backend/README.md](backend/README.md)):
 
 ```powershell
-cd mobile
+docker compose up --build -d
+docker compose exec api python -m scripts.seed_demo
+```
+
+Aplicativo em modo demonstração (pasta `mobile/`):
+
+```powershell
 ..\.tools\flutter\bin\flutter.bat pub get
 ..\.tools\flutter\bin\flutter.bat run -d chrome
 ```
 
-Para usar uma instalação global, substitua o caminho por `flutter`. O
-identificador Android provisório é `br.edu.cesuca.zelo`.
+Aplicativo conectado à API local:
 
-## Como executar o backend
+```powershell
+# Navegador (Chrome ou Edge)
+..\.tools\flutter\bin\flutter.bat run -d edge --dart-define=ZELO_API_URL=http://localhost:8000
+# Emulador Android
+..\.tools\flutter\bin\flutter.bat run --dart-define=ZELO_API_URL=http://10.0.2.2:8000
+```
 
-O backend ainda não foi implementado. As instruções reais serão adicionadas no
-marco correspondente; não há comandos fictícios de execução nesta versão.
+Em celular físico, use o IP do computador na rede local. HTTP sem TLS só é
+aceito em builds de debug; fora do ambiente local, use HTTPS (RNF05).
+
+Se o navegador ficar com a tela branca, veja a seção "Se a tela ficar branca
+no navegador" em [mobile/README.md](mobile/README.md); para apenas ver o app,
+o build de release servido na raiz é o caminho mais estável.
+
+A conta de demonstração do backend usa `ZELO_DEMO_EMAIL` e
+`ZELO_DEMO_PASSWORD` do `backend/.env`.
 
 ## Testes
 
-Com o SDK portátil:
-
 ```powershell
-cd mobile
+# Aplicativo (mobile/)
 ..\.tools\flutter\bin\dart.bat format --output=none --set-exit-if-changed .
 ..\.tools\flutter\bin\flutter.bat analyze
 ..\.tools\flutter\bin\flutter.bat test
+
+# Backend (backend/)
+.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\ruff check .
 ```
 
-O plano completo está em [docs/testing-plan.md](docs/testing-plan.md). A suíte
-possui 47 testes aprovados em 21/09/2026. Ela cobre a abertura, redução de
-movimento, bootstrap paralelo, onboarding, autenticação simulada, os quatro
-destinos autenticados, acesso a Medicamentos pela Home, responsividade essencial
-e o fluxo manual de medicamentos. Os dados dos medicamentos permanecem somente
-em memória e são reiniciados quando o aplicativo é fechado.
+Também existem um teste de contrato opcional do app contra a API real
+(`mobile/tool/e2e`) e um gerador de capturas de tela determinísticas
+(`mobile/tool/screenshots`). O plano completo está em
+[docs/testing-plan.md](docs/testing-plan.md).
 
 ## Próximos passos
 
-1. Instalar ou disponibilizar Android SDK e JDK 17.
-2. Validar a splash e a transição em Android 12+ real ou emulador, inclusive sem
-   quadro branco, distorção ou recorte.
-3. Desenhar e reconciliar no Figma onboarding, login, cadastro e recuperação.
-4. Fornecer e aprovar os textos jurídicos de termos e política de privacidade.
-5. Iniciar backend, persistência e autenticação real no M4.
-6. Integrar o fluxo de medicamentos à API Zelo sem alterar as regras testadas.
-7. Adicionar Poppins quando os arquivos licenciados da fonte forem fornecidos.
+1. Instalar o APK de debug num celular e validar splash, permissões de
+   localização, câmera/galeria, armazenamento seguro e abertura de mapas em
+   Android 12+ (ver `mobile/README.md`).
+2. Validar os lembretes de validade (RF06, já implementados) num aparelho
+   Android: aviso de teste, aviso agendado e reinício.
+3. Avaliar a leitura da embalagem com fotos reais e registrar acertos e
+   correções.
+4. Definir provedor de e-mail para a recuperação de senha e hospedagem com
+   HTTPS.
+5. Reconciliar as telas no Figma, aprovar os textos jurídicos e aplicar o
+   protocolo de usabilidade.
+6. Decidir sobre lembretes de uso e reposição (D039) e leitura de receitas
+   (D040).
 
-Consulte [docs/backlog.md](docs/backlog.md) para os marcos posteriores.
+Consulte [docs/backlog.md](docs/backlog.md) para os marcos.
