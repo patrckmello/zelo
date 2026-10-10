@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/zelo_colors.dart';
+import '../../../core/theme/zelo_tokens.dart';
+import '../../../core/widgets/skeleton.dart';
+import '../../../core/widgets/state_message.dart';
 import '../application/medication_store.dart';
 import '../domain/medication.dart';
+import '../domain/medication_repository.dart';
+import '../domain/medication_scan.dart';
 import 'medication_detail_page.dart';
 import 'medication_form_page.dart';
-import 'medication_presentation.dart';
+import 'medication_scenes.dart';
+import 'widgets/medication_tile.dart';
 
-class MedicationsPage extends StatelessWidget {
-  const MedicationsPage({required this.store, super.key});
+class MedicationsPage extends StatefulWidget {
+  const MedicationsPage({
+    required this.store,
+    this.initialFilter,
+    this.scanner,
+    super.key,
+  });
 
   final MedicationStore store;
+  final MedicationStatus? initialFilter;
+  final MedicationScanner? scanner;
+
+  @override
+  State<MedicationsPage> createState() => _MedicationsPageState();
+}
+
+class _MedicationsPageState extends State<MedicationsPage> {
+  late MedicationStatus? _filter = widget.initialFilter;
+
+  MedicationStore get _store => widget.store;
 
   @override
   Widget build(BuildContext context) {
@@ -17,240 +40,177 @@ class MedicationsPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Medicamentos')),
       body: SafeArea(
         top: false,
-        child: ListenableBuilder(
-          listenable: store,
-          builder: (context, _) {
-            final errorMessage = store.errorMessage;
-            if (errorMessage != null) {
-              return _ErrorState(message: errorMessage, onRetry: store.retry);
-            }
-
-            final medications = store.medications;
-            if (medications.isEmpty) {
-              return _EmptyState(onAdd: () => openMedicationForm(context));
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
-              itemCount: medications.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final medication = medications[index];
-                return _MedicationCard(
-                  medication: medication,
-                  referenceDate: store.today,
-                  onTap: () => _openDetails(context, medication.id),
-                );
-              },
-            );
-          },
-        ),
+        child: ListenableBuilder(listenable: _store, builder: _buildBody),
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const ValueKey('add-medication-button'),
-        onPressed: () => openMedicationForm(context),
+        onPressed: _add,
         icon: const Icon(Icons.add),
         label: const Text('Cadastrar'),
       ),
     );
   }
 
-  Future<void> openMedicationForm(BuildContext context) async {
-    final draft = await Navigator.of(context).push<MedicationDraft>(
-      MaterialPageRoute(builder: (_) => const MedicationFormPage()),
-    );
-
-    if (draft == null || !context.mounted) {
-      return;
+  Widget _buildBody(BuildContext context, Widget? _) {
+    if (_store.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(
+          ZeloSpace.gutter,
+          ZeloSpace.xs,
+          ZeloSpace.gutter,
+          0,
+        ),
+        child: SkeletonList(label: 'Carregando medicamentos'),
+      );
     }
 
-    final medication = store.add(draft);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${medication.name} foi cadastrado.')),
+    if (_store.status == MedicationLoadStatus.failure) {
+      return CenteredState(
+        child: StateMessage(
+          liveRegion: true,
+          illustration: const LoadFailureScene(),
+          title: 'Não foi possível carregar os medicamentos',
+          message: _store.errorMessage ?? MedicationStore.loadErrorMessage,
+          action: OutlinedButton.icon(
+            onPressed: _store.retry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tentar novamente'),
+          ),
+        ),
+      );
+    }
+
+    final medications = _store.medications;
+    if (medications.isEmpty) {
+      return CenteredState(
+        child: StateMessage(
+          illustration: const EmptyShelfScene(),
+          title: 'Sua farmácia está vazia',
+          message:
+              'Cadastre o primeiro medicamento para acompanhar sua validade.',
+          action: FilledButton.icon(
+            onPressed: _add,
+            icon: const Icon(Icons.add),
+            label: const Text('Cadastrar medicamento'),
+          ),
+        ),
+      );
+    }
+
+    final today = _store.today;
+    final visible = _filter == null
+        ? medications
+        : _store.medicationsWithStatus(_filter!);
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          ZeloSpace.gutter,
+          ZeloSpace.xxs,
+          ZeloSpace.gutter,
+          96,
+        ),
+        children: [
+          _FilterBar(
+            selected: _filter,
+            total: medications.length,
+            countOf: _store.countByStatus,
+            onSelected: (status) => setState(() => _filter = status),
+          ),
+          const SizedBox(height: ZeloSpace.md),
+          if (visible.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: ZeloSpace.xl),
+              child: Text(
+                'Nenhum medicamento nesta situação.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: ZeloColors.inkMuted),
+              ),
+            ),
+          for (final medication in visible) ...[
+            MedicationTile(
+              medication: medication,
+              referenceDate: today,
+              onTap: () => _openDetails(medication.id),
+            ),
+            const SizedBox(height: ZeloSpace.sm),
+          ],
+        ],
+      ),
     );
   }
 
-  Future<void> _openDetails(BuildContext context, String medicationId) async {
+  Future<void> _refresh() async {
+    try {
+      await _store.refresh();
+    } on MedicationRepositoryException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    }
+  }
+
+  Future<void> _add() => openMedicationForm(
+    context,
+    onSave: _store.add,
+    referenceDate: _store.today,
+    scanner: widget.scanner,
+  );
+
+  Future<void> _openDetails(String medicationId) async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) =>
-            MedicationDetailPage(store: store, medicationId: medicationId),
+            MedicationDetailPage(store: _store, medicationId: medicationId),
       ),
     );
   }
 }
 
-class _MedicationCard extends StatelessWidget {
-  const _MedicationCard({
-    required this.medication,
-    required this.referenceDate,
-    required this.onTap,
+class _FilterBar extends StatelessWidget {
+  const _FilterBar({
+    required this.selected,
+    required this.total,
+    required this.countOf,
+    required this.onSelected,
   });
 
-  final Medication medication;
-  final DateTime referenceDate;
-  final VoidCallback onTap;
+  final MedicationStatus? selected;
+  final int total;
+  final int Function(MedicationStatus status) countOf;
+  final ValueChanged<MedicationStatus?> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final status = medication.statusAt(referenceDate);
-
-    return Card(
-      child: InkWell(
-        key: ValueKey('medication-card-${medication.id}'),
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      medication.name,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-              const SizedBox(height: 10),
-              MedicationStatusBadge(status: status),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 16,
-                runSpacing: 6,
-                children: [
-                  _Metadata(
-                    icon: Icons.event_outlined,
-                    text: 'Validade: ${formatDate(medication.expirationDate)}',
-                  ),
-                  _Metadata(
-                    icon: Icons.inventory_2_outlined,
-                    text: 'Quantidade: ${medication.quantity}',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+    final options = <(MedicationStatus?, String, int)>[
+      (null, 'Todos', total),
+      (MedicationStatus.expired, 'Vencidos', countOf(MedicationStatus.expired)),
+      (
+        MedicationStatus.expiringSoon,
+        'Próximos',
+        countOf(MedicationStatus.expiringSoon),
       ),
-    );
-  }
-}
+      (MedicationStatus.valid, 'Válidos', countOf(MedicationStatus.valid)),
+    ];
 
-class _Metadata extends StatelessWidget {
-  const _Metadata({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 18, color: Theme.of(context).colorScheme.secondary),
-        const SizedBox(width: 6),
-        Text(text, style: Theme.of(context).textTheme.bodyMedium),
-      ],
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onAdd});
-
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.medication_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Sua farmácia está vazia',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Cadastre o primeiro medicamento para acompanhar sua validade.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: onAdd,
-                icon: const Icon(Icons.add),
-                label: const Text('Cadastrar medicamento'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.cloud_off_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Não foi possível carregar os medicamentos',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tentar novamente'),
-              ),
-            ],
-          ),
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Row(
+        children: [
+          for (final (status, label, count) in options) ...[
+            ChoiceChip(
+              key: ValueKey('medication-filter-${status?.name ?? 'all'}'),
+              selected: selected == status,
+              onSelected: (_) => onSelected(status),
+              label: Text('$label  $count'),
+            ),
+            const SizedBox(width: ZeloSpace.xs),
+          ],
+        ],
       ),
     );
   }

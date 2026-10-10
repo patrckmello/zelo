@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../core/widgets/brand_lockup.dart';
+
+/// Abertura: parte do mesmo quadro da splash nativa (símbolo centralizado) e
+/// revela nome, slogan e a faixa de validade (D011, D036). Um toque encerra
+/// antes.
 class BrandIntroPage extends StatefulWidget {
   const BrandIntroPage({
     required this.onFinished,
-    this.duration = const Duration(milliseconds: 800),
+    this.duration = defaultDuration,
     super.key,
   });
+
+  static const defaultDuration = Duration(milliseconds: 1300);
 
   final VoidCallback onFinished;
   final Duration duration;
@@ -17,9 +24,6 @@ class BrandIntroPage extends StatefulWidget {
 class _BrandIntroPageState extends State<BrandIntroPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _fade;
-  late final Animation<double> _scale;
-  late final Animation<double> _turns;
   var _started = false;
   var _finished = false;
 
@@ -27,13 +31,6 @@ class _BrandIntroPageState extends State<BrandIntroPage>
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
-    final curve = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
-    _fade = Tween<double>(begin: 0.65, end: 1).animate(curve);
-    _scale = Tween<double>(begin: 0.82, end: 1).animate(curve);
-    _turns = Tween<double>(begin: -0.18, end: 0).animate(curve);
   }
 
   @override
@@ -62,22 +59,14 @@ class _BrandIntroPageState extends State<BrandIntroPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: FadeTransition(
-            opacity: _fade,
-            child: ScaleTransition(
-              scale: _scale,
-              child: RotationTransition(
-                turns: _turns,
-                child: Image.asset(
-                  'assets/branding/zelo-symbol.png',
-                  key: const ValueKey('zelo-brand-symbol'),
-                  width: 144,
-                  height: 144,
-                  semanticLabel: 'Símbolo do Zelo',
-                ),
-              ),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _finish,
+        child: SafeArea(
+          child: Center(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) => BrandLockup(reveal: _controller.value),
             ),
           ),
         ),
@@ -90,6 +79,7 @@ class _BrandIntroPageState extends State<BrandIntroPage>
       return;
     }
     _finished = true;
+    _controller.stop();
     widget.onFinished();
   }
 }

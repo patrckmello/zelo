@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/zelo_tokens.dart';
 import '../domain/authentication_service.dart';
 import 'auth_page_frame.dart';
 import 'auth_validators.dart';
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             if (_errorMessage case final message?) ...[
               AuthErrorMessage(message),
-              const SizedBox(height: 16),
+              const SizedBox(height: ZeloSpace.md),
             ],
             TextFormField(
               key: const ValueKey('login-email-field'),
@@ -64,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               validator: validateEmail,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: ZeloSpace.md),
             TextFormField(
               key: const ValueKey('login-password-field'),
               controller: _passwordController,
@@ -101,29 +102,37 @@ class _LoginPageState extends State<LoginPage> {
                 child: const Text('Esqueci minha senha'),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: ZeloSpace.sm),
             FilledButton(
               key: const ValueKey('login-submit-button'),
               onPressed: _isLoading ? null : _submit,
               child: _isLoading
                   ? const SizedBox.square(
-                      dimension: 24,
+                      dimension: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text('Entrar'),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              key: const ValueKey('demo-login-button'),
-              onPressed: _isLoading ? null : _signInAsDemo,
-              icon: const Icon(Icons.play_circle_outline),
-              label: const Text('Entrar como demonstração'),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            if (widget.authenticationService.isSimulated) ...[
+              const SizedBox(height: ZeloSpace.lg),
+              const AuthDivider(),
+              const SizedBox(height: ZeloSpace.lg),
+              FilledButton.tonalIcon(
+                key: const ValueKey('demo-login-button'),
+                onPressed: _isLoading ? null : _signInAsDemo,
+                icon: const Icon(Icons.play_circle_outline),
+                label: const Text('Entrar como demonstração'),
+              ),
+            ],
+            const SizedBox(height: ZeloSpace.xl),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Flexible(child: Text('Ainda não tem uma conta?')),
+                Text(
+                  'Ainda não tem uma conta?',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 TextButton(
                   key: const ValueKey('register-link'),
                   onPressed: _isLoading ? null : widget.onRegister,

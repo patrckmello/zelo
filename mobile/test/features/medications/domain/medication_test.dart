@@ -45,4 +45,31 @@ void main() {
       );
     });
   });
+
+  test('conta dias civis ignorando horários', () {
+    expect(
+      civilDaysBetween(DateTime(2026, 8, 24, 23, 59), DateTime(2026, 8, 25)),
+      1,
+    );
+    expect(
+      civilDaysBetween(DateTime(2026, 8, 24), DateTime(2026, 8, 19, 8)),
+      -5,
+    );
+    expect(statusForDaysUntilExpiration(-1), MedicationStatus.expired);
+    expect(statusForDaysUntilExpiration(0), MedicationStatus.expiringSoon);
+    expect(statusForDaysUntilExpiration(31), MedicationStatus.valid);
+  });
+
+  test('normaliza rascunho antes de persistir', () {
+    final draft = MedicationDraft(
+      name: '  Dipirona ',
+      expirationDate: DateTime(2027, 3, 4, 15, 30),
+      quantity: 2,
+      notes: ' Cozinha ',
+    ).normalized();
+
+    expect(draft.name, 'Dipirona');
+    expect(draft.notes, 'Cozinha');
+    expect(draft.expirationDate, DateTime(2027, 3, 4));
+  });
 }

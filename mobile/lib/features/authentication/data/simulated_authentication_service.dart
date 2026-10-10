@@ -10,6 +10,13 @@ class SimulatedAuthenticationService implements AuthenticationService {
 
   final SessionStore sessionStore;
 
+  /// A simulação não distingue login, cadastro e demonstração (D023).
+  @override
+  SessionAccount? get currentAccount => const SessionAccount.simulated();
+
+  @override
+  bool get isSimulated => true;
+
   @override
   Future<bool> restoreSession() => sessionStore.hasActiveSession();
 
@@ -42,5 +49,18 @@ class SimulatedAuthenticationService implements AuthenticationService {
   }
 
   @override
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {
+    throw const AuthenticationFailure(
+      'A troca de senha exige o servidor do Zelo.',
+    );
+  }
+
+  @override
   Future<void> signOut() => sessionStore.clearSession();
+
+  @override
+  Stream<void> get sessionExpirations => const Stream.empty();
 }

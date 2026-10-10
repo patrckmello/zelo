@@ -41,9 +41,9 @@ void main() {
     expect(find.text('Dipirona'), findsOneWidget);
     expect(find.text('Loratadina'), findsOneWidget);
     expect(find.text('Soro fisiológico'), findsOneWidget);
-    expect(find.text('Válido'), findsOneWidget);
-    expect(find.text('Próximo do vencimento'), findsOneWidget);
-    expect(find.text('Vencido'), findsOneWidget);
+    expect(find.textContaining('Válido ·'), findsOneWidget);
+    expect(find.textContaining('Próximo do vencimento ·'), findsOneWidget);
+    expect(find.textContaining('Vencido ·'), findsOneWidget);
   });
 
   testWidgets('exibe quatro destinos sem aba de medicamentos', (tester) async {
@@ -87,13 +87,50 @@ void main() {
     );
   });
 
+  testWidgets('atalho da Início em Descartar oferece voltar', (tester) async {
+    final store = MedicationStore.seeded(clock: () => referenceDate);
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Encontrar ponto de descarte'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Separados para descarte'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('page-back-button')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sua farmácia doméstica'), findsOneWidget);
+
+    // Pela barra inferior, a área é de primeiro nível e não tem o atalho.
+    await tester.tap(find.text('Descartar'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('page-back-button')), findsNothing);
+  });
+
+  testWidgets('voltar do sistema em outra área retorna ao Início', (
+    tester,
+  ) async {
+    final store = MedicationStore.seeded(clock: () => referenceDate);
+    addTearDown(store.dispose);
+
+    await tester.pumpWidget(authenticatedApp(store));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Histórico'));
+    await tester.pumpAndSettle();
+    expect(find.text('Nenhum descarte registrado'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Sua farmácia doméstica'), findsOneWidget);
+  });
+
   testWidgets('valida e cadastra medicamento manualmente', (tester) async {
     final store = MedicationStore(clock: () => referenceDate);
     addTearDown(store.dispose);
 
     await tester.pumpWidget(authenticatedApp(store));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cadastrar medicamento'));
+    await tapVisible(tester, find.text('Cadastrar medicamento'));
     await tester.pumpAndSettle();
 
     await tester.enterText(

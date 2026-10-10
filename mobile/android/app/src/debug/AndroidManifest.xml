@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Somente em debug: permite a API local por HTTP (emulador em
+         http://10.0.2.2:8000 ou celular na mesma rede). Builds de release
+         continuam exigindo HTTPS (RNF05). -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

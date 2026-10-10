@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zelo/app/bootstrap/app_launch_flow.dart';
+import 'package:zelo/app/bootstrap/brand_intro_page.dart';
 import 'package:zelo/app/zelo_app.dart';
 import 'package:zelo/features/authentication/data/simulated_authentication_service.dart';
 import 'package:zelo/features/medications/application/medication_store.dart';
@@ -31,7 +33,7 @@ void main() {
       buildApp(preferences: preferences, sessionStore: sessionStore),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-skip-button')));
     await tester.pumpAndSettle();
@@ -51,7 +53,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Entre no Zelo'), findsOneWidget);
-    expect(find.text('Cuide dos seus medicamentos'), findsNothing);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsNothing);
   });
 
   testWidgets('sessão restaurada abre a Home e a navegação inferior', (
@@ -101,7 +103,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('demo-login-button')));
+      await tapVisible(tester, find.byKey(const ValueKey('demo-login-button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Sua farmácia doméstica'), findsOneWidget);
@@ -135,7 +137,7 @@ void main() {
     expect(find.text(SimulatedAuthenticationService.demoEmail), findsNothing);
     expect(find.byKey(const ValueKey('logout-button')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('logout-button')));
+    await tapVisible(tester, find.byKey(const ValueKey('logout-button')));
     await tester.pumpAndSettle();
 
     expect(sessionStore.active, isFalse);
@@ -155,14 +157,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('register-link')));
+    await tapVisible(tester, find.byKey(const ValueKey('register-link')));
     await tester.pumpAndSettle();
     expect(find.text('Crie sua conta'), findsOneWidget);
     await tester.tap(find.byTooltip('Voltar'));
     await tester.pumpAndSettle();
     expect(find.text('Entre no Zelo'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('recover-password-link')));
+    await tapVisible(
+      tester,
+      find.byKey(const ValueKey('recover-password-link')),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Recupere seu acesso'), findsOneWidget);
     await tester.tap(find.byTooltip('Voltar'));
@@ -197,7 +202,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpAndSettle();
-    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsOneWidget);
   });
 
   testWidgets('mostra espera real quando a animação termina primeiro', (
@@ -217,10 +222,20 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 801));
-    await tester.pump();
+    // A faixa de carregamento repete enquanto a inicialização não termina,
+    // então avança-se o relógio até a abertura sair.
+    final limit =
+        BrandIntroPage.defaultDuration + AppLaunchFlow.fadeDuration * 3;
+    var elapsed = Duration.zero;
+    while (find.byType(BrandIntroPage).evaluate().isNotEmpty &&
+        elapsed < limit) {
+      await tester.pump(const Duration(milliseconds: 100));
+      elapsed += const Duration(milliseconds: 100);
+    }
 
+    // Mesma assinatura da abertura, agora com a faixa indicando a espera.
     expect(find.text('Preparando o Zelo…'), findsOneWidget);
+    expect(find.text('Zelo'), findsOneWidget);
 
     completer.complete(true);
     await tester.pumpAndSettle();

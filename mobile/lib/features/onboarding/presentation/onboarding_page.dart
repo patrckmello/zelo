@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/storage/onboarding_preferences.dart';
+import '../../../core/theme/zelo_colors.dart';
+import '../../../core/theme/zelo_tokens.dart';
 import 'onboarding_illustration.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -21,25 +25,41 @@ class _OnboardingPageState extends State<OnboardingPage> {
   static const _items = <_OnboardingItem>[
     _OnboardingItem(
       visual: OnboardingVisual.organization,
-      title: 'Cuide dos seus medicamentos',
+      eyebrow: 'Organize',
+      title: 'Sua farmácia de casa, em ordem',
       description:
-          'Cadastre seus medicamentos e acompanhe suas datas de validade.',
+          'Cadastre o que você guarda e veja tudo organizado pela data de '
+          'validade.',
+      illustration: 'Embalagens na prateleira, cada uma com a validade.',
     ),
     _OnboardingItem(
       visual: OnboardingVisual.wastePrevention,
-      title: 'Evite desperdícios',
-      description: 'Receba alertas antes que seus medicamentos vençam.',
+      eyebrow: 'Cuide',
+      title: 'Saiba o que vence antes de vencer',
+      description:
+          'O Zelo destaca o que vence nos próximos 30 dias, para você usar a '
+          'tempo e evitar desperdício.',
+      illustration: 'Linha de validade entrando na janela de 30 dias.',
     ),
     _OnboardingItem(
       visual: OnboardingVisual.responsibleDisposal,
-      title: 'Descarte com responsabilidade',
-      description: 'Encontre locais próximos para realizar o descarte correto.',
+      eyebrow: 'Descarte certo',
+      title: 'Leve ao ponto de coleta mais perto',
+      description:
+          'Encontre pontos de coleta perto de você e registre cada descarte '
+          'no seu histórico.',
+      illustration: 'Embalagem vencida seguindo até um ponto de coleta.',
+      note:
+          'Nenhuma permissão é pedida agora. A localização só é usada quando '
+          'você buscar um ponto.',
     ),
   ];
 
   final _pageController = PageController();
   int _currentPage = 0;
   bool _isSaving = false;
+
+  bool get _isLast => _currentPage == _items.length - 1;
 
   @override
   void dispose() {
@@ -58,109 +78,113 @@ class _OnboardingPageState extends State<OnboardingPage> {
       },
       child: Scaffold(
         body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
-                  children: [
-                    if (_currentPage > 0)
-                      IconButton(
-                        key: const ValueKey('onboarding-back-button'),
-                        onPressed: _isSaving ? null : _goBack,
-                        tooltip: 'Voltar para a página anterior',
-                        icon: const Icon(Icons.arrow_back),
-                      )
-                    else
-                      const SizedBox(width: 48, height: 48),
-                    const Spacer(),
-                    TextButton(
-                      key: const ValueKey('onboarding-skip-button'),
-                      onPressed: _isSaving ? null : _complete,
-                      child: const Text('Pular'),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: PageView.builder(
-                  key: const ValueKey('onboarding-pages'),
-                  controller: _pageController,
-                  itemCount: _items.length,
-                  onPageChanged: (index) =>
-                      setState(() => _currentPage = index),
-                  itemBuilder: (context, index) => _OnboardingContent(
-                    item: _items[index],
-                    pageNumber: index + 1,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                children: [
+                  _TopBar(
+                    showBack: _currentPage > 0,
+                    showSkip: !_isLast,
+                    enabled: !_isSaving,
+                    onBack: _goBack,
+                    onSkip: _complete,
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Semantics(
-                      label: 'Página ${_currentPage + 1} de ${_items.length}',
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (var index = 0; index < _items.length; index++)
-                            _PageIndicatorDot(
-                              index: index,
-                              isCurrent: index == _currentPage,
-                            ),
-                        ],
+                  Expanded(
+                    child: PageView.builder(
+                      key: const ValueKey('onboarding-pages'),
+                      controller: _pageController,
+                      itemCount: _items.length,
+                      onPageChanged: (index) =>
+                          setState(() => _currentPage = index),
+                      itemBuilder: (context, index) => AnimatedBuilder(
+                        animation: _pageController,
+                        builder: (context, _) => _OnboardingContent(
+                          item: _items[index],
+                          pageNumber: index + 1,
+                          active: index == _currentPage,
+                          offset: _offsetOf(index),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Página ${_currentPage + 1} de ${_items.length}',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      ZeloSpace.xl,
+                      ZeloSpace.sm,
+                      ZeloSpace.xl,
+                      ZeloSpace.xl,
                     ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      key: ValueKey(
-                        _currentPage == _items.length - 1
-                            ? 'onboarding-start-button'
-                            : 'onboarding-next-button',
-                      ),
-                      onPressed: _isSaving ? null : _goForward,
-                      child: _isSaving
-                          ? const SizedBox.square(
-                              dimension: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              _currentPage == _items.length - 1
-                                  ? 'Começar'
-                                  : 'Próximo',
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Progress(current: _currentPage, total: _items.length),
+                        const SizedBox(height: ZeloSpace.lg),
+                        FilledButton(
+                          key: ValueKey(
+                            _isLast
+                                ? 'onboarding-start-button'
+                                : 'onboarding-next-button',
+                          ),
+                          onPressed: _isSaving ? null : _goForward,
+                          child: _isSaving
+                              ? const SizedBox.square(
+                                  dimension: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        _isLast ? 'Começar' : 'Continuar',
+                                      ),
+                                    ),
+                                    const SizedBox(width: ZeloSpace.xs),
+                                    const Icon(Icons.arrow_forward, size: 20),
+                                  ],
+                                ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// Distância da página [index] até a posição atual do arraste (-1 a 1).
+  double _offsetOf(int index) {
+    if (!_pageController.hasClients ||
+        !_pageController.position.hasContentDimensions) {
+      return (index - _currentPage).toDouble().clamp(-1.0, 1.0);
+    }
+    final page = _pageController.page ?? _currentPage.toDouble();
+    return (index - page).clamp(-1.0, 1.0);
+  }
+
   void _goBack() {
+    if (_currentPage == 0) {
+      return;
+    }
     if (MediaQuery.disableAnimationsOf(context)) {
       _pageController.jumpToPage(_currentPage - 1);
       return;
     }
     _pageController.previousPage(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 320),
+      curve: ZeloMotion.easeOut,
     );
   }
 
   void _goForward() {
-    if (_currentPage == _items.length - 1) {
+    if (_isLast) {
       _complete();
       return;
     }
@@ -169,8 +193,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
       return;
     }
     _pageController.nextPage(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 320),
+      curve: ZeloMotion.easeOut,
     );
   }
 
@@ -197,74 +221,198 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 }
 
-class _OnboardingContent extends StatelessWidget {
-  const _OnboardingContent({required this.item, required this.pageNumber});
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.showBack,
+    required this.showSkip,
+    required this.enabled,
+    required this.onBack,
+    required this.onSkip,
+  });
 
-  final _OnboardingItem item;
-  final int pageNumber;
+  final bool showBack;
+  final bool showSkip;
+  final bool enabled;
+  final VoidCallback onBack;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  OnboardingIllustration(
-                    visual: item.visual,
-                    pageNumber: pageNumber,
-                    semanticLabel: 'Ilustração: ${item.title}',
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    item.title,
-                    key: ValueKey('onboarding-title-$pageNumber'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    item.description,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            if (showBack)
+              IconButton(
+                key: const ValueKey('onboarding-back-button'),
+                onPressed: enabled ? onBack : null,
+                tooltip: 'Voltar para a página anterior',
+                icon: const Icon(Icons.arrow_back),
+              )
+            else
+              const SizedBox(width: 48),
+            const Spacer(),
+            if (showSkip)
+              TextButton(
+                key: const ValueKey('onboarding-skip-button'),
+                onPressed: enabled ? onSkip : null,
+                child: const Text('Pular'),
               ),
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _PageIndicatorDot extends StatelessWidget {
-  const _PageIndicatorDot({required this.index, required this.isCurrent});
+class _OnboardingContent extends StatelessWidget {
+  const _OnboardingContent({
+    required this.item,
+    required this.pageNumber,
+    required this.active,
+    required this.offset,
+  });
 
-  final int index;
-  final bool isCurrent;
+  final _OnboardingItem item;
+  final int pageNumber;
+  final bool active;
+  final double offset;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 180),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: isCurrent ? 28 : 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.outlineVariant,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
+    final textTheme = Theme.of(context).textTheme;
+    // O texto chega um pouco depois do palco durante o arraste.
+    final textShift = offset * 48;
+    final textOpacity = 1 - math.min(offset.abs() * 1.4, 1).toDouble();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stageHeight = (constraints.maxHeight * 0.58).clamp(220.0, 440.0);
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            ZeloSpace.md,
+            ZeloSpace.xs,
+            ZeloSpace.md,
+            ZeloSpace.md,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: stageHeight,
+                child: OnboardingIllustration(
+                  visual: item.visual,
+                  pageNumber: pageNumber,
+                  semanticLabel: 'Ilustração: ${item.illustration}',
+                  active: active,
+                  parallax: offset,
+                ),
+              ),
+              const SizedBox(height: ZeloSpace.xl),
+              Opacity(
+                opacity: textOpacity,
+                child: Transform.translate(
+                  offset: Offset(textShift, 0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: ZeloSpace.xs,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${pageNumber.toString().padLeft(2, '0')} · '
+                          '${item.eyebrow.toUpperCase()}',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: ZeloColors.validInk,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: ZeloSpace.xs),
+                        Text(
+                          item.title,
+                          key: ValueKey('onboarding-title-$pageNumber'),
+                          style: textTheme.headlineMedium?.copyWith(
+                            letterSpacing: -0.6,
+                            height: 1.15,
+                          ),
+                        ),
+                        const SizedBox(height: ZeloSpace.sm),
+                        Text(
+                          item.description,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: ZeloColors.inkMuted,
+                          ),
+                        ),
+                        if (item.note case final note?) ...[
+                          const SizedBox(height: ZeloSpace.md),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.lock_outline,
+                                size: 18,
+                                color: ZeloColors.inkMuted,
+                              ),
+                              const SizedBox(width: ZeloSpace.xs),
+                              Expanded(
+                                child: Text(
+                                  note,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: ZeloColors.inkMuted,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Progresso em segmentos; o atual se alonga e preenche.
+class _Progress extends StatelessWidget {
+  const _Progress({required this.current, required this.total});
+
+  final int current;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Página ${current + 1} de $total',
+      child: ExcludeSemantics(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var index = 0; index < total; index++)
+              AnimatedContainer(
+                duration: ZeloMotion.of(context, ZeloMotion.standard),
+                curve: ZeloMotion.easeOut,
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: index == current ? 32 : 12,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: index <= current
+                      ? ZeloColors.petroleumBlue
+                      : ZeloColors.petroleumBlue.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(ZeloRadii.pill),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -273,11 +421,17 @@ class _PageIndicatorDot extends StatelessWidget {
 class _OnboardingItem {
   const _OnboardingItem({
     required this.visual,
+    required this.eyebrow,
     required this.title,
     required this.description,
+    required this.illustration,
+    this.note,
   });
 
   final OnboardingVisual visual;
+  final String eyebrow;
   final String title;
   final String description;
+  final String illustration;
+  final String? note;
 }

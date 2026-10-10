@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/zelo_tokens.dart';
+import '../../../core/widgets/inline_notice.dart';
 import '../domain/authentication_service.dart';
 import 'auth_page_frame.dart';
 import 'auth_validators.dart';
@@ -52,24 +54,26 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
               if (_requestCompleted) ...[
                 Semantics(
                   liveRegion: true,
-                  child: Card(
+                  child: InlineNotice(
                     key: const ValueKey('recovery-success-message'),
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        'Se houver uma conta para este e-mail, as instruções '
-                        'de recuperação serão apresentadas pelo serviço real '
-                        'quando ele estiver disponível.',
-                      ),
-                    ),
+                    tone: NoticeTone.positive,
+                    icon: Icons.mark_email_read_outlined,
+                    title: widget.authenticationService.isSimulated
+                        ? 'Solicitação registrada'
+                        : 'Verifique seu e-mail',
+                    message: widget.authenticationService.isSimulated
+                        ? 'Se houver uma conta para este e-mail, as instruções '
+                              'de recuperação serão apresentadas pelo serviço '
+                              'real quando ele estiver disponível.'
+                        : 'Se houver uma conta para este e-mail, enviaremos '
+                              'as instruções de recuperação.',
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: ZeloSpace.md),
               ],
               if (_errorMessage case final message?) ...[
                 AuthErrorMessage(message),
-                const SizedBox(height: 16),
+                const SizedBox(height: ZeloSpace.md),
               ],
               TextFormField(
                 key: const ValueKey('recovery-email-field'),
@@ -85,23 +89,30 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                 ),
                 validator: validateEmail,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: ZeloSpace.lg),
               FilledButton(
                 key: const ValueKey('recovery-submit-button'),
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
                     ? const SizedBox.square(
-                        dimension: 24,
+                        dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text('Solicitar recuperação'),
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Nenhum e-mail real será enviado nesta versão simulada.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              const SizedBox(height: ZeloSpace.sm),
+              if (widget.authenticationService.isSimulated)
+                Text(
+                  'Nenhum e-mail real será enviado nesta versão simulada.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              if (_requestCompleted &&
+                  !widget.authenticationService.isSimulated)
+                _ResetCodeForm(
+                  authenticationService: widget.authenticationService,
+                  onBackToLogin: widget.onBack,
+                ),
             ],
           ),
         ),
@@ -134,6 +145,166 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
           () => _errorMessage =
               'Não foi possível concluir a solicitação. Tente novamente.',
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+}
+
+/// Segunda etapa da recuperação: código recebido e nova senha.
+class _ResetCodeForm extends StatefulWidget {
+  const _ResetCodeForm({
+    required this.authenticationService,
+    required this.onBackToLogin,
+  });
+
+  final AuthenticationService authenticationService;
+  final VoidCallback onBackToLogin;
+
+  @override
+  State<_ResetCodeForm> createState() => _ResetCodeFormState();
+}
+
+class _ResetCodeFormState extends State<_ResetCodeForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _codeController = TextEditingController();
+  final _passwordController = TextEditingController();
+  var _isLoading = false;
+  var _completed = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_completed) {
+      return Padding(
+        padding: const EdgeInsets.only(top: ZeloSpace.xl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              liveRegion: true,
+              child: const InlineNotice(
+                key: ValueKey('reset-completed-message'),
+                tone: NoticeTone.positive,
+                icon: Icons.lock_reset_outlined,
+                title: 'Senha alterada',
+                message:
+                    'Entre com a nova senha. Sessões anteriores foram '
+                    'encerradas.',
+              ),
+            ),
+            const SizedBox(height: ZeloSpace.md),
+            FilledButton(
+              onPressed: widget.onBackToLogin,
+              child: const Text('Voltar para o login'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: ZeloSpace.xl),
+          const Divider(),
+          const SizedBox(height: ZeloSpace.lg),
+          Text(
+            'Já recebeu o código?',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: ZeloSpace.md),
+          if (_errorMessage case final message?) ...[
+            AuthErrorMessage(message),
+            const SizedBox(height: ZeloSpace.md),
+          ],
+          TextFormField(
+            key: const ValueKey('reset-code-field'),
+            controller: _codeController,
+            enabled: !_isLoading,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(
+              labelText: 'Código de recuperação',
+              prefixIcon: Icon(Icons.pin_outlined),
+            ),
+            validator: (value) =>
+                validateRequired(value, 'Informe o código recebido.'),
+          ),
+          const SizedBox(height: ZeloSpace.md),
+          TextFormField(
+            key: const ValueKey('reset-password-field'),
+            controller: _passwordController,
+            enabled: !_isLoading,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            autofillHints: const [AutofillHints.newPassword],
+            onFieldSubmitted: (_) => _submit(),
+            decoration: const InputDecoration(
+              labelText: 'Nova senha',
+              helperText: 'Use pelo menos 8 caracteres.',
+              prefixIcon: Icon(Icons.lock_outline),
+            ),
+            validator: (value) {
+              final requiredError = validateRequired(
+                value,
+                'Informe a nova senha.',
+              );
+              if (requiredError != null) {
+                return requiredError;
+              }
+              return value!.length < 8
+                  ? 'A senha deve ter pelo menos 8 caracteres.'
+                  : null;
+            },
+          ),
+          const SizedBox(height: ZeloSpace.lg),
+          FilledButton.tonal(
+            key: const ValueKey('reset-confirm-button'),
+            onPressed: _isLoading ? null : _submit,
+            child: _isLoading
+                ? const SizedBox.square(
+                    dimension: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Criar nova senha'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      await widget.authenticationService.confirmPasswordReset(
+        code: _codeController.text,
+        newPassword: _passwordController.text,
+      );
+      if (mounted) {
+        setState(() => _completed = true);
+      }
+    } on AuthenticationFailure catch (error) {
+      if (mounted) {
+        setState(() => _errorMessage = error.message);
       }
     } finally {
       if (mounted) {

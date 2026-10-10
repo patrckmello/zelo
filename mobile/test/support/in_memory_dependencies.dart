@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:zelo/core/storage/onboarding_preferences.dart';
 import 'package:zelo/core/storage/session_store.dart';
 
@@ -74,4 +75,11 @@ class DeferredOnboardingPreferences implements OnboardingPreferences {
 
   @override
   Future<void> markCompleted() async {}
+}
+
+/// Rola até o alvo antes de tocar, como a pessoa faria em telas menores.
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.tap(finder);
 }

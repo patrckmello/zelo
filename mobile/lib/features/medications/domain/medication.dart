@@ -20,23 +20,15 @@ class Medication {
   MedicationStatus statusAt(
     DateTime referenceDate, {
     int warningDays = defaultExpirationWarningDays,
-  }) {
-    assert(warningDays >= 0, 'warningDays não pode ser negativo.');
+  }) => statusForDaysUntilExpiration(
+    daysUntilExpirationAt(referenceDate),
+    warningDays: warningDays,
+  );
 
-    final expiration = _dateOnlyUtc(expirationDate);
-    final reference = _dateOnlyUtc(referenceDate);
-
-    if (expiration.isBefore(reference)) {
-      return MedicationStatus.expired;
-    }
-
-    final daysUntilExpiration = expiration.difference(reference).inDays;
-    if (daysUntilExpiration <= warningDays) {
-      return MedicationStatus.expiringSoon;
-    }
-
-    return MedicationStatus.valid;
-  }
+  /// Dias civis entre [referenceDate] e a validade; negativo após o
+  /// vencimento. Horários são ignorados.
+  int daysUntilExpirationAt(DateTime referenceDate) =>
+      civilDaysBetween(referenceDate, expirationDate);
 
   Medication copyWith({
     String? name,
@@ -66,7 +58,35 @@ class MedicationDraft {
   final DateTime expirationDate;
   final int quantity;
   final String notes;
+
+  /// Remove espaços nas bordas e descarta o horário da validade.
+  MedicationDraft normalized() => MedicationDraft(
+    name: name.trim(),
+    expirationDate: dateOnly(expirationDate),
+    quantity: quantity,
+    notes: notes.trim(),
+  );
 }
+
+/// Regra única de validade (D009): antes da data de referência está vencido;
+/// de hoje até [warningDays], inclusive, está próximo; depois, válido.
+MedicationStatus statusForDaysUntilExpiration(
+  int daysUntilExpiration, {
+  int warningDays = defaultExpirationWarningDays,
+}) {
+  assert(warningDays >= 0, 'warningDays não pode ser negativo.');
+  if (daysUntilExpiration < 0) {
+    return MedicationStatus.expired;
+  }
+  if (daysUntilExpiration <= warningDays) {
+    return MedicationStatus.expiringSoon;
+  }
+  return MedicationStatus.valid;
+}
+
+/// Diferença em dias civis de [from] até [to], ignorando horários e fusos.
+int civilDaysBetween(DateTime from, DateTime to) =>
+    _dateOnlyUtc(to).difference(_dateOnlyUtc(from)).inDays;
 
 DateTime dateOnly(DateTime value) =>
     DateTime(value.year, value.month, value.day);

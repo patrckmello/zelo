@@ -14,15 +14,15 @@ void main() {
       ),
     );
 
-    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('onboarding-next-button')));
     await tester.pumpAndSettle();
-    expect(find.text('Evite desperdícios'), findsOneWidget);
-    expect(find.text('Página 2 de 3'), findsOneWidget);
+    expect(find.text('Saiba o que vence antes de vencer'), findsOneWidget);
+    expect(find.bySemanticsLabel('Página 2 de 3'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('onboarding-back-button')));
     await tester.pumpAndSettle();
-    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsOneWidget);
   });
 
   testWidgets('pular persiste a conclusão do onboarding', (tester) async {
@@ -62,7 +62,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('onboarding-next-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Descarte com responsabilidade'), findsOneWidget);
+    expect(find.text('Leve ao ponto de coleta mais perto'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('onboarding-start-button')));
     await tester.pump();
 
@@ -89,8 +89,8 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Cuide dos seus medicamentos'), findsOneWidget);
-    expect(find.text('Página 1 de 3'), findsOneWidget);
+    expect(find.text('Sua farmácia de casa, em ordem'), findsOneWidget);
+    expect(find.bySemanticsLabel('Página 1 de 3'), findsOneWidget);
   });
 
   testWidgets('usa uma composição visual em cada página', (tester) async {
@@ -141,8 +141,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('onboarding-next-button')));
     await tester.pump();
 
-    expect(find.text('Evite desperdícios'), findsOneWidget);
-    expect(find.text('Página 2 de 3'), findsOneWidget);
+    expect(find.text('Saiba o que vence antes de vencer'), findsOneWidget);
+    expect(find.bySemanticsLabel('Página 2 de 3'), findsOneWidget);
   });
 
   testWidgets('layout suporta tela pequena com texto ampliado', (tester) async {
@@ -197,5 +197,55 @@ void main() {
     final back = find.byKey(const ValueKey('onboarding-back-button'));
     expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
     expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('última página explica permissões e dispensa o Pular', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: OnboardingPage(
+          preferences: InMemoryOnboardingPreferences(),
+          onCompleted: () {},
+        ),
+      ),
+    );
+    for (var page = 1; page < 3; page++) {
+      await tester.tap(find.byKey(const ValueKey('onboarding-next-button')));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.byKey(const ValueKey('onboarding-skip-button')), findsNothing);
+    expect(find.textContaining('Nenhuma permissão é pedida'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('onboarding-start-button')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('cenas ficam prontas sem animar com redução de movimento', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: OnboardingPage(
+            preferences: InMemoryOnboardingPreferences(),
+            onCompleted: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Nenhum quadro pendente: a cena já está no estado final.
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    expect(
+      find.byKey(const ValueKey('onboarding-illustration-1')),
+      findsOneWidget,
+    );
   });
 }

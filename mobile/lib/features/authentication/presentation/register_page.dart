@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/zelo_tokens.dart';
 import '../domain/authentication_service.dart';
 import 'auth_page_frame.dart';
 import 'auth_validators.dart';
@@ -61,7 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
             children: [
               if (_errorMessage case final message?) ...[
                 AuthErrorMessage(message),
-                const SizedBox(height: 16),
+                const SizedBox(height: ZeloSpace.md),
               ],
               TextFormField(
                 key: const ValueKey('register-name-field'),
@@ -77,7 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 validator: (value) =>
                     validateRequired(value, 'Informe o nome.'),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: ZeloSpace.md),
               TextFormField(
                 key: const ValueKey('register-email-field'),
                 controller: _emailController,
@@ -91,7 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 validator: validateEmail,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: ZeloSpace.md),
               TextFormField(
                 key: const ValueKey('register-password-field'),
                 controller: _passwordController,
@@ -133,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: ZeloSpace.md),
               TextFormField(
                 key: const ValueKey('register-confirmation-field'),
                 controller: _confirmationController,
@@ -159,15 +160,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: ZeloSpace.sm),
               CheckboxListTile(
                 key: const ValueKey('register-terms-checkbox'),
                 value: _acceptedTerms,
                 enabled: !_isLoading,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text(
+                title: Text(
                   'Li e aceito os termos de uso e a política de privacidade.',
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 subtitle: _showTermsError
                     ? Text(
@@ -182,13 +184,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   _showTermsError = false;
                 }),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: ZeloSpace.md),
               FilledButton(
                 key: const ValueKey('register-submit-button'),
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
                     ? const SizedBox.square(
-                        dimension: 24,
+                        dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text('Criar conta'),
