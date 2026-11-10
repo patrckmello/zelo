@@ -30,5 +30,6 @@ USER zelo
 
 EXPOSE 8000
 
-# Aplica as migrações e inicia a API.
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"]
+# Aplica as migrações e inicia a API. Hospedagens como o Cloud Run definem a
+# porta em PORT; sem ela, vale a 8000 (Docker Compose local).
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000}"]

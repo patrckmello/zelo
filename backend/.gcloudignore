@@ -1,0 +1,19 @@
+# O que NÃO é enviado ao Google Cloud Build em `gcloud run deploy --source .`.
+# Segredos e ambientes locais nunca devem subir; o Dockerfile só copia
+# alembic/, app/ e scripts/, mas o envio do código-fonte leva a pasta inteira.
+.gcloudignore
+.git
+.gitignore
+
+.env
+.env.*
+!.env.example
+cloudrun.env.yaml
+.outbox
+.venv
+.ocr-benchmark
+.pytest_cache
+.ruff_cache
+**/__pycache__
+*.db
+tests

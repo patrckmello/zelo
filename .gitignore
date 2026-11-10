@@ -4,6 +4,7 @@
 !.env.example
 *.pem
 *.key
+backend/cloudrun.env.yaml
 
 # Flutter e Dart
 .dart_tool/
