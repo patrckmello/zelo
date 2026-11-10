@@ -29,7 +29,7 @@ validação em Android continua pendente para todos os itens.
 | RF11 | Registrar descarte simples | Implementado na API; em memória na demonstração |
 | RF12 | Consultar histórico de descartes | Implementado na API; em memória na demonstração |
 | RF13 | Autenticar usuário por e-mail e senha | Implementado na API; simulado na demonstração |
-| RF14 | Solicitar recuperação de senha | Implementado com código de uso único; entrega por e-mail **PENDENTE** de provedor |
+| RF14 | Solicitar recuperação de senha | Implementado com código de uso único; envio por SMTP implementado e testado com servidor simulado (D043); **e-mail real PENDENTE** de conta configurada |
 | RF15 | Restaurar uma sessão válida ao reabrir o aplicativo | Implementado com token de renovação em armazenamento seguro; simulado na demonstração |
 | RF16 | Encerrar a sessão do usuário | Implementado, com revogação no servidor, exclusivamente pela Conta |
 | RF17 | Exibir splash nativa com fundo monocromático e logo do Zelo | Compila no APK (tema do Android 12+ corrigido em 03/10/2026); verificação em aparelho pendente |

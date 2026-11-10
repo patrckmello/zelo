@@ -19,11 +19,19 @@ build. `ZELO_OCR_ENGINE=tesseract` força o Tesseract.
 2. Para consultar pontos reais, preencha `ECOMED_API_KEY`. Sem a chave, a API
    funciona normalmente e responde `503 collection_points_not_configured` na
    busca de pontos.
-3. Nunca versione o `.env`; ele já está no `.gitignore`.
+3. Para enviar o código de recuperação por e-mail, preencha
+   `ZELO_SMTP_HOST`, `ZELO_SMTP_USER` e `ZELO_SMTP_PASSWORD` (os três juntos).
+   Com Gmail: use uma conta dedicada, ative a verificação em duas etapas, crie
+   uma senha de app e use `smtp.gmail.com`, porta 587 e `starttls`. Sem SMTP,
+   o código vai para a caixa local em desenvolvimento (`ZELO_PASSWORD_RESET_OUTBOX_DIR`).
+4. Nunca versione o `.env`; ele já está no `.gitignore`.
 
 > Neste repositório, um `backend/.env` local foi gerado em 02/10/2026 com
 > segredos aleatórios de desenvolvimento; a equipe adicionou a
 > `ECOMED_API_KEY` depois. Ele não é versionado.
+
+Para publicar a API na nuvem (Cloud Run + Neon), veja
+[`docs/deployment.md`](../docs/deployment.md).
 
 ## Execução com Docker (recomendada)
 
@@ -149,6 +157,9 @@ Todas as rotas `/v1`, exceto as de autenticação, exigem
   foram encontrados. Limite de 20 leituras por minuto por conta.
 - Logs sem senhas, tokens, chave EcoMed ou coordenadas; o logger do httpx fica
   em `WARNING` porque registraria URLs com coordenadas.
-- Recuperação de senha: sem provedor de e-mail definido (PENDENTE). Em
-  desenvolvimento, `ZELO_PASSWORD_RESET_OUTBOX_DIR` grava o código em arquivo
-  local ignorado pelo Git; em produção a entrega fica desativada.
+- Recuperação de senha: o código é enviado por SMTP depois da resposta, para
+  que a demora não revele quais e-mails têm conta (D043). O log registra só o
+  canal e o tipo de erro, nunca o código, o e-mail ou a senha de aplicativo.
+  Sem SMTP, `ZELO_PASSWORD_RESET_OUTBOX_DIR` grava o código em arquivo local
+  ignorado pelo Git (só fora de produção); do contrário a entrega fica
+  desativada. Envio real ainda **não** verificado: PENDENTE.

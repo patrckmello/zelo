@@ -8,7 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     password_reset_outbox_dir: Path | None = Field(
         default=None, alias="ZELO_PASSWORD_RESET_OUTBOX_DIR"
     )
+    smtp_host: str | None = Field(default=None, alias="ZELO_SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="ZELO_SMTP_PORT", ge=1, le=65535)
+    smtp_security: Literal["starttls", "ssl"] = Field(
+        default="starttls", alias="ZELO_SMTP_SECURITY"
+    )
+    smtp_username: str | None = Field(default=None, alias="ZELO_SMTP_USER")
+    smtp_password: SecretStr | None = Field(default=None, alias="ZELO_SMTP_PASSWORD")
+    smtp_sender: str | None = Field(default=None, alias="ZELO_SMTP_FROM")
+    smtp_timeout_seconds: float = Field(default=10.0, alias="ZELO_SMTP_TIMEOUT_SECONDS", gt=0)
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=list, alias="ZELO_CORS_ORIGINS"
     )
@@ -79,6 +88,26 @@ class Settings(BaseSettings):
         if isinstance(value, str) and not value.strip():
             return None
         return value
+
+    @field_validator("smtp_host", "smtp_username", "smtp_password", "smtp_sender", mode="before")
+    @classmethod
+    def _blank_smtp_is_missing(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @model_validator(mode="after")
+    def _smtp_all_or_nothing(self) -> "Settings":
+        parts = (self.smtp_host, self.smtp_username, self.smtp_password)
+        if any(parts) and not all(parts):
+            raise ValueError(
+                "Configure ZELO_SMTP_HOST, ZELO_SMTP_USER e ZELO_SMTP_PASSWORD juntos, ou nenhum."
+            )
+        return self
+
+    @property
+    def smtp_configured(self) -> bool:
+        return self.smtp_host is not None
 
     @property
     def ecomed_configured(self) -> bool:

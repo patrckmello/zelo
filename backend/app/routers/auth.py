@@ -2,7 +2,7 @@
 
 from datetime import timedelta
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Request, Response
 from sqlalchemy import select
 
 from ..dependencies import ContainerDep, CurrentUser, DbDep, as_utc
@@ -117,7 +117,10 @@ def me(user: CurrentUser) -> User:
 
 @router.post("/password-reset/request", status_code=202)
 def request_password_reset(
-    body: PasswordResetRequest, container: ContainerDep, db: DbDep
+    body: PasswordResetRequest,
+    container: ContainerDep,
+    db: DbDep,
+    background: BackgroundTasks,
 ) -> dict[str, str]:
     user = db.scalar(select(User).where(User.email == body.email.lower()))
     if user is not None:
@@ -131,7 +134,9 @@ def request_password_reset(
             )
         )
         db.commit()
-        container.password_reset_notifier.send(user.email, token, expires_at)
+        # Envio após a resposta: o SMTP leva segundos e, feito aqui, a demora
+        # revelaria quais e-mails têm conta.
+        background.add_task(container.password_reset_notifier.send, user.email, token, expires_at)
     # Mesma resposta com ou sem conta, para não revelar e-mails cadastrados.
     return {
         "message": "Se houver uma conta para este e-mail, enviaremos as instruções de recuperação."

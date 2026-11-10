@@ -13,8 +13,28 @@ from .services.password_reset import (
     DisabledPasswordResetNotifier,
     OutboxPasswordResetNotifier,
     PasswordResetNotifier,
+    SmtpPasswordResetNotifier,
 )
 from .services.rate_limiter import SlidingWindowLimiter
+
+
+def _default_notifier(settings: Settings) -> PasswordResetNotifier:
+    """SMTP quando configurado; senão a caixa local (só fora de produção)."""
+    if settings.smtp_configured:
+        username = settings.smtp_username or ""
+        return SmtpPasswordResetNotifier(
+            host=settings.smtp_host or "",
+            port=settings.smtp_port,
+            username=username,
+            password=settings.smtp_password.get_secret_value() if settings.smtp_password else "",
+            sender=settings.smtp_sender or username,
+            use_ssl=settings.smtp_security == "ssl",
+            timeout_seconds=settings.smtp_timeout_seconds,
+        )
+    outbox = settings.password_reset_outbox_dir
+    if outbox is not None and settings.environment != "production":
+        return OutboxPasswordResetNotifier(outbox)
+    return DisabledPasswordResetNotifier()
 
 
 @dataclass
@@ -50,12 +70,7 @@ class AppContainer:
             else None
         )
         if password_reset_notifier is None:
-            outbox = settings.password_reset_outbox_dir
-            password_reset_notifier = (
-                OutboxPasswordResetNotifier(outbox)
-                if outbox is not None and settings.environment != "production"
-                else DisabledPasswordResetNotifier()
-            )
+            password_reset_notifier = _default_notifier(settings)
         return cls(
             settings=settings,
             database=Database(settings.database_url),
