@@ -54,16 +54,24 @@ class ZeloApiClient {
     required this._tokenStore,
     http.Client? httpClient,
     this.timeout = const Duration(seconds: 15),
+    this.firstRequestTimeout = const Duration(seconds: 40),
   }) : _http = httpClient ?? http.Client();
 
   final Uri baseUrl;
   final Duration timeout;
+
+  /// Limite das chamadas feitas antes da primeira resposta do servidor. A API
+  /// na nuvem escala a zero e a primeira chamada depois de um tempo parada
+  /// levou 12,19 s em 31/10/2026 (D044), perto demais dos 15 s de [timeout].
+  /// Depois da primeira resposta, vale [timeout].
+  final Duration firstRequestTimeout;
   final TokenStore _tokenStore;
   final http.Client _http;
   final _expirations = StreamController<void>.broadcast();
 
   String? _accessToken;
   Future<ApiSession?>? _refreshInFlight;
+  bool _serverResponded = false;
 
   Stream<void> get sessionExpirations => _expirations.stream;
 
@@ -185,7 +193,7 @@ class ZeloApiClient {
     if (authenticated && token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
-    return _execute(request, timeout);
+    return _execute(request, _serverResponded ? timeout : firstRequestTimeout);
   }
 
   Uri _uri(String path, Map<String, String>? query) => baseUrl.replace(
@@ -199,7 +207,9 @@ class ZeloApiClient {
   ) async {
     try {
       final streamed = await _http.send(request).timeout(limit);
-      return await http.Response.fromStream(streamed).timeout(limit);
+      final response = await http.Response.fromStream(streamed).timeout(limit);
+      _serverResponded = true;
+      return response;
     } on TimeoutException {
       throw const ApiException.network();
     } on http.ClientException {

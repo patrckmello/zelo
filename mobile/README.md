@@ -169,6 +169,8 @@ $env:GRADLE_USER_HOME = 'D:\Code\zelo\.tools\gradle-home'
 ..\.tools\flutter\bin\flutter.bat build apk --debug
 # Conectado à API do computador (celular na mesma rede):
 ..\.tools\flutter\bin\flutter.bat build apk --debug --dart-define=ZELO_API_URL=http://<IP do computador>:8000
+# Conectado à API na nuvem (HTTPS, funciona fora da sua rede; D044):
+..\.tools\flutter\bin\flutter.bat build apk --debug --dart-define=ZELO_API_URL=<URL_DA_API>
 ```
 
 O APK fica em `build/app/outputs/flutter-apk/app-debug.apk`. Para instalar:

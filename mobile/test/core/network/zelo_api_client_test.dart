@@ -156,6 +156,57 @@ void main() {
     );
   });
 
+  group('tempo limite', () {
+    ZeloApiClient slowClient({Duration? first}) => ZeloApiClient(
+      baseUrl: baseUrl,
+      tokenStore: InMemoryTokenStore(),
+      timeout: const Duration(milliseconds: 100),
+      firstRequestTimeout: first ?? const Duration(milliseconds: 1000),
+      httpClient: MockClient((request) async {
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        return http.Response(
+          '{"status":"ok"}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    test(
+      'a primeira chamada tolera a partida a frio e as seguintes não',
+      () async {
+        final client = slowClient();
+
+        // 300 ms passa de 100 ms, mas cabe nos 1000 ms da primeira chamada.
+        final first = await client.send('GET', '/health', authenticated: false);
+        expect(first, {'status': 'ok'});
+
+        await expectLater(
+          client.send('GET', '/health', authenticated: false),
+          throwsA(
+            isA<ApiException>().having((e) => e.isNetwork, 'rede', isTrue),
+          ),
+        );
+      },
+    );
+
+    test(
+      'a primeira chamada também esgota se passar do limite maior',
+      () async {
+        final client = slowClient(first: const Duration(milliseconds: 150));
+
+        for (var attempt = 0; attempt < 2; attempt++) {
+          await expectLater(
+            client.send('GET', '/health', authenticated: false),
+            throwsA(
+              isA<ApiException>().having((e) => e.isNetwork, 'rede', isTrue),
+            ),
+          );
+        }
+      },
+    );
+  });
+
   test('logout revoga no servidor e limpa o armazenamento', () async {
     final backend = FakeZeloBackend();
     final store = InMemoryTokenStore();
