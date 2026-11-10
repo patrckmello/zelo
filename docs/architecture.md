@@ -5,10 +5,15 @@
 Implementado e verificado até 03/10/2026: aplicativo Flutter com design system
 próprio e dois modos de execução (D029), backend FastAPI com PostgreSQL,
 autenticação real, perfil e exclusão de conta, medicamentos isolados por
-conta, leitura assistida da embalagem (Tesseract no servidor), descartes com
-histórico e cliente EcoMed validado com respostas reais. Pendentes: validação
-em Android, provedor de e-mail, hospedagem com HTTPS e notificações de
-validade.
+conta, leitura assistida da embalagem (RapidOCR no servidor, com Tesseract como reserva), descartes com
+histórico e cliente EcoMed validado com respostas reais. A API também está
+publicada (Cloud Run + Neon, pública desde 31/10/2026, D044; ver
+`docs/deployment.md`) e, em 10/11/2026, consultou a EcoMed a partir da nuvem.
+No celular (Galaxy A12) foram validados só login, sessão e tela inicial
+(31/10/2026). Pendentes: os demais fluxos no aparelho (cadastro, câmera,
+localização e pontos, descarte, histórico), notificações de validade em Android,
+envio real do e-mail de recuperação (SMTP implementado, D043) e IP de saída fixo
+caso a EcoMed passe a exigir lista de IPs.
 
 ## Visão de contexto
 
@@ -20,7 +25,7 @@ Aplicativo Flutter (Android; também verificado na Web)
   |
   | HTTPS fora do ambiente local, somente API Zelo
   v
-Backend Zelo (FastAPI) ── Tesseract (OCR local, imagem só em memória)
+Backend Zelo (FastAPI) ── OCR local (RapidOCR; Tesseract de reserva; imagem só em memória)
   |                     |
   v                     v
 PostgreSQL          API EcoMed (X-API-Key só no servidor)
@@ -220,7 +225,8 @@ backend/
 ### Responsabilidades implementadas
 
 - cadastro, login com limite de tentativas, renovação com rotação e detecção de
-  reuso, logout, recuperação de senha com código de uso único;
+  reuso, logout, recuperação de senha com código de uso único, enviado por
+  SMTP em segundo plano (D043);
 - perfil: consulta com contagens, troca de nome, de e-mail e de senha (com
   senha atual e limite de tentativas) e exclusão da conta em cascata;
 - medicamentos ativos por conta, com validação e 404 para itens de outra conta;

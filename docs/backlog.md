@@ -106,9 +106,51 @@ Estado: em andamento (implementação local concluída em 02/10/2026).
   com todos os dados (03/10/2026, D034);
 - [x] leitura assistida da embalagem com Tesseract no backend e conferência
   no app (03/10/2026, D035);
-- [ ] provedor de e-mail para entregar o código de recuperação (hoje há caixa
-  de saída local em desenvolvimento);
-- [ ] hospedagem com HTTPS para uso fora da rede local;
+- [x] envio do código de recuperação por SMTP com conta dedicada e senha de
+  aplicativo, em segundo plano (10/10/2026, D043; testes com servidor
+  simulado);
+- [ ] configurar a conta SMTP no `backend/.env`, enviar um e-mail real e
+  conferir caixa de entrada e spam;
+- [ ] provedor transacional com domínio próprio (uso real, após a Mostra);
+- [x] publicar a API no Cloud Run com Neon em modo privado (31/10/2026, D044;
+  `/health`, login e medicamentos verificados na nuvem);
+- [x] tornar a API pública (`allUsers` / `roles/run.invoker`) para o app no
+  celular: executado pelo responsável em 31/10/2026 (a ferramenta de permissões
+  havia recusado a ação);
+- [x] instalar o APK apontando para a nuvem em um Galaxy A12 (Android 13) e
+  validar abertura, login e tela inicial (31/10/2026);
+- [ ] testar no celular os demais fluxos: cadastro, câmera e leitura de
+  embalagem com fotos reais, localização e pontos, descarte, histórico,
+  persistência da sessão e avisos de validade;
+- [x] tratar a partida a frio: 12,19 s na primeira chamada depois de mais de
+  uma hora parado (uma medição), contra o tempo limite de 15 s do app. Decisão
+  de 31/10/2026: tempo limite de 40 s só até a primeira resposta
+  (`firstRequestTimeout`, 153 testes Flutter passando) e aquecimento da API
+  antes de apresentar (`docs/deployment.md`); instância sempre ligada
+  descartada por custo (não calculado);
+- [x] repetir a partida a frio com o APK novo no celular: 6,59 s, concluiu sem
+  erro e restaurou a sessão (31/10/2026; medições de 6,6 s e 12,2 s);
+- [x] terceira medição, a partir do computador, depois de mais de 9 dias parado:
+  `/health` 200 em 14,94 s (10/11/2026); as três medições ficam entre 6,6 s e
+  14,9 s, perto do limite antigo de 15 s do app, o que sustenta os 40 s na
+  primeira chamada;
+- [x] verificar a consulta de pontos EcoMed pela API na nuvem: 30 pontos em Porto
+  Alegre (1,92 s cache frio, 0,32 s quente) e 30 em Cachoeirinha (1,03 s e
+  0,36 s), sem liberação de IP (10/11/2026, por script; no celular continua
+  PENDENTE);
+- [ ] **condicional:** se a EcoMed exigir lista de IPs permitidos, configurar IP
+  de saída fixo no Cloud Run (VPC + Cloud NAT + IP reservado), planejado e **não
+  testado** em `docs/deployment.md`; o Cloud Run não tem um IP único para
+  informar, e ativar a restrição antes disso derruba os pontos na nuvem;
+- [x] testes reexecutados em 10/11/2026: 153 Flutter, 71 backend, `analyze`,
+  formatação e `ruff` sem falhas;
+- [ ] medir o tempo de abertura de um build de **release** (o de debug levou
+  cerca de 9 s só para desenhar a primeira tela no Galaxy A12);
+- [ ] medir a memória real com foto de 2400 × 1800 px na nuvem (leitura de 4
+  fotos de 1290 × 915 px: 200, 13,96 s a primeira e 5,2–5,6 s as demais; a
+  imagem ocupa 348,98 MB no repositório) e repetir a partida a frio;
+- [ ] lembrar que a conta Google é de teste gratuito (69 dias restantes em
+  31/10/2026): depois disso a API para, salvo "upgrade";
 - [ ] validar o armazenamento seguro e o modo conectado em Android.
 
 ## M5 - EcoMed e pontos

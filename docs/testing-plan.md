@@ -41,7 +41,9 @@ indicado como pendente.
 - criação de conta e prevenção de e-mail duplicado;
 - autenticação válida e rejeição de credenciais incorretas;
 - hash de senha e ausência de senha ou token em logs;
-- recuperação de senha com token temporário;
+- recuperação de senha com token temporário e entrega por SMTP simulado
+  (ordem STARTTLS → login → envio, falhas sem vazar código nem senha, escolha
+  do notificador pela configuração, configuração parcial rejeitada);
 - renovação, expiração e revogação de sessão;
 - regras de autorização e isolamento dos dados do usuário;
 - validação das operações de medicamento e descarte;
@@ -173,7 +175,7 @@ Aplicativo (`mobile/`):
 
 Backend (`backend/`):
 
-- `pytest`: 37 testes aprovados (autenticação, rotação e reuso de tokens,
+- `pytest`: 71 testes aprovados em 10/10/2026 (autenticação, rotação e reuso de tokens,
   limite de login, recuperação, isolamento de medicamentos, descartes, pontos
   com EcoMed simulada, cache, limite local, 429, chave recusada sem vazamento
   em respostas e logs, timeout, resposta inválida, migração em banco limpo e
@@ -201,7 +203,9 @@ Não executado:
 - Android: Android SDK, `adb`, `sdkmanager` e `java` continuam ausentes;
   permissões, armazenamento seguro, intents de mapa/telefone, APK e splash não
   foram validados em dispositivo ou emulador;
-- envio de e-mail de recuperação: não há provedor configurado.
+- envio real de e-mail de recuperação: o SMTP está implementado (D043) e
+  testado só com servidor simulado; falta configurar a conta no `backend/.env`
+  e conferir a chegada (inclusive no spam).
 
 O build Web mantém o aviso não bloqueante sobre `CupertinoIcons`.
 
@@ -323,6 +327,114 @@ interpretador para os dois motores.
 - Limite: imagens sintéticas, mais fáceis que fotos reais (caixas curvas,
   plástico brilhante, letras miúdas). A taxa com embalagens reais continua
   PENDENTE.
+
+## API na nuvem, Cloud Run privado + Neon (31/10/2026)
+
+Ambiente: serviço `zelo-api` em `us-central1` (2 GiB, 1 vCPU, no máximo 1
+instância), banco Neon (PostgreSQL 18), chamadas a partir do computador do
+desenvolvedor, uma rodada. Primeiro **privado** e, depois, **público** (aberto
+pelo responsável). Procedimento em `docs/deployment.md`.
+
+Executado e observado:
+
+- build e deploy a partir do código-fonte (`gcloud run deploy --source`): 185 s;
+- `/health` sem credencial do Google: 403; com credencial: 200 com
+  `database: ok`, `ecomed_configured: true` e `ocr_available: true`;
+- migração `0001` aplicada no Neon pela partida do contêiner (registros);
+- login da conta de demonstração: 200; senha errada: 401; `/v1/auth/me`: 200;
+  `/v1/medications`: 3 itens; sem token do app: 401;
+- latência (uma amostra cada, instância recém-criada, **não** é partida a
+  frio): `/health` 0,76 s e 0,36 s; login 0,91 s; `/auth/me` 0,31 s;
+  `/medications` 0,37 s;
+- registros sem tokens, senhas ou segredos.
+
+Com a API pública (mesmo dia):
+
+- `/health` sem credencial: 200; `/v1/medications` sem token: 401 da API; HTTP
+  redirecionado para HTTPS (302);
+- leitura de embalagem (`POST /v1/ocr/medication`) com 4 fotos sintéticas de
+  1290 × 915 px: 200 nas 4, com nome, validade e quantidade; 13,96 s na
+  primeira (carrega o motor) e 5,21–5,64 s nas outras três;
+- 20 chamadas seguidas com o token do app: 20 × 200, mediana de 0,34 s;
+- falha observada: a primeira chamada de OCR logo após a abertura recebeu 401
+  do portão do Google e a repetição passou; hipótese de propagação do IAM, não
+  provada, sem nova ocorrência.
+
+APK apontando para a nuvem (31/10/2026): gerado com
+`flutter build apk --debug --dart-define=ZELO_API_URL=<URL_DA_API>`
+em 229 s (189.153.548 bytes, SHA-1 `79a1cb74452ba04a7ff60a91fbd24c3393836e32`).
+Conferido por inspeção do arquivo que `kernel_blob.bin` contém a URL da nuvem e
+nenhuma das URLs antigas (emulador, Tailscale, rede local). Nesse momento ainda
+**não havia sido instalado nem executado**; a instalação no celular está logo
+abaixo.
+
+No celular (Samsung Galaxy A12, modelo SM-A127M, Android 13, arm64, Wi-Fi), por
+depuração USB, ainda em 31/10/2026:
+
+- `adb install -r` do APK de debug: Success, 14 s;
+- o app abriu (`MainActivity` em primeiro plano), mostrou a abertura "Preparando
+  o Zelo…" e depois a tela de login, sem exceção no `logcat` (exceções de
+  outros processos do sistema não foram consideradas);
+- login com a conta demo digitado por `adb shell input`: a tela inicial exibiu
+  "3 medicamentos cadastrados" (1 válido, 1 próximo do vencimento, 1 vencido),
+  com Soro fisiológico (vencido há 5 dias) e Loratadina (vence em 12 dias);
+- os registros do Cloud Run mostram as chamadas do app (`Dart/3.13`): `refresh`
+  401, `login` 200 (0,46 s), `medications` 200 (0,12 s) e `disposals` 200
+  (0,10 s);
+- **partida a frio:** a primeira chamada, depois de mais de uma hora parado, levou
+  12,19 s (detalhe em `docs/deployment.md`), contra um tempo limite de 15 s do
+  app; uma medição só;
+- ao abrir, o app tentou renovar uma sessão guardada e recebeu 401; a origem
+  dessa sessão (instalação anterior mantida pelo `-r` ou backup) **não foi
+  investigada**, mas o app voltou corretamente à tela de login.
+
+Tempo limite da primeira chamada (31/10/2026): `ZeloApiClient` passou a aceitar
+40 s até a primeira resposta do servidor e 15 s depois. Dois testes novos em
+`test/core/network/zelo_api_client_test.dart` (a primeira chamada tolera a
+espera e a seguinte não; a primeira também esgota se passar do limite maior).
+`flutter analyze`: sem problemas; `flutter test`: 153 testes aprovados (67 s).
+
+APK com o tempo limite novo (31/10/2026): gerado em 190 s (189.152.301 bytes,
+SHA-1 `5acad512570041f392417e6a903299f016ca5b17`), com a URL da nuvem embutida e
+sem a do emulador; instalado por `adb install -r` (Success). Primeira tentativa
+de abrir com a tela do aparelho bloqueada: o app não abriu e nenhuma chamada
+chegou à API (nada a registrar além disso). Com o aparelho desbloqueado:
+
+- o app abriu, restaurou a sessão guardada sozinho (`refresh` 200) e foi direto
+  à tela inicial com os 3 medicamentos, sem login e sem erro no `logcat`;
+  isso confirma, neste aparelho, que o token de renovação guardado sobrevive ao
+  fechamento do app e a uma reinstalação com `-r`;
+- partida a frio (instância parada há cerca de 19 min): `refresh` em **6,59 s**
+  (a medição anterior foi 12,19 s; duas medições no total);
+- `Displayed +8s957ms` no build de debug; do toque à tela inicial, cerca de 20 s.
+
+Não executado no celular (PENDENTE): cadastro de medicamento, câmera e leitura
+de embalagem (fotos reais), permissão de localização e busca de pontos,
+descarte e histórico, avisos de validade e build de release (tempo de abertura).
+
+Não executado (PENDENTE): memória real com foto de 2400 × 1800 px, comportamento
+do pool depois da suspensão do Neon e e-mail de recuperação.
+
+### Reverificação em 10/11/2026 (véspera da Mostra)
+
+Feita a partir do computador, com a API pública e a conta demo; a senha foi
+passada por variável de ambiente do processo e não está em arquivo.
+
+- **Qualidade local:** `dart format` (106 arquivos, 0 alterados), `flutter
+  analyze` (sem problemas), `flutter test` (153 aprovados), `pytest` do backend
+  (71 aprovados) e `ruff check` (sem problemas);
+- **API na nuvem:** `/health` 200 com `database: ok`, `ecomed_configured: true` e
+  `ocr_available: true`, em **14,94 s** (`curl`, depois de mais de 9 dias sem
+  tráfego; terceira medição de partida a frio, entre 6,6 s e 14,9 s no total);
+- **login da conta demo:** 200 em 0,99 s com a instância já aquecida;
+- **pontos EcoMed pela API na nuvem** (`GET /v1/collection-points/nearby`, raio de
+  10 km): Porto Alegre, 200 com 30 pontos em 1,92 s (cache frio) e 0,32 s (cache
+  quente); Cachoeirinha, 200 com 30 pontos em 1,03 s e 0,36 s. Primeira vez que
+  essa rota foi exercitada fora do computador; a EcoMed respondeu sem
+  liberação de IP;
+- **limite desta verificação:** a consulta de pontos foi por script. A tela de
+  pontos, a permissão de localização e a abertura do mapa no celular **não foram
+  testadas**.
 
 ## Lembretes de validade (03/10/2026)
 

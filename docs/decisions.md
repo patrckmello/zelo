@@ -290,13 +290,13 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 
 ## D028 - Recuperação de senha
 
-- Estado: aceita para o fluxo; entrega por e-mail pendente
+- Estado: aceita para o fluxo; entrega por e-mail em D043
 - Decisão: código aleatório de uso único, válido por 30 minutos e guardado como
   hash. A solicitação responde igual com ou sem conta. A confirmação troca a
   senha e encerra as sessões.
-- Pendente: provedor de e-mail. Em desenvolvimento, o código pode ser gravado
-  em uma caixa de saída local ignorada pelo Git; em produção a entrega fica
-  desativada até a escolha do provedor.
+- Entrega: ver D043 (SMTP). Sem SMTP configurado, o código pode ser gravado em
+  uma caixa de saída local ignorada pelo Git (só fora de produção); do
+  contrário a entrega fica desativada.
 
 ## D029 - Modos de execução do aplicativo
 
@@ -526,3 +526,164 @@ será marcada como aceita quando confirmada ou aplicada e validada.
 - Alternativa descartada: push pelo servidor. Exigiria Firebase, token do
   aparelho no servidor e envio de nomes de medicamentos a terceiros.
 - Fora desta decisão: lembrete de uso e de reposição (D039) seguem pendentes.
+
+## D043 - Envio do código de recuperação por SMTP
+
+- Estado: aceita em 10/10/2026 para a demonstração (Mostra); verificada em
+  testes com servidor SMTP simulado, **sem e-mail real enviado ainda**
+  (PENDENTE até a conta e a senha de aplicativo estarem no `backend/.env`)
+- Decisão: o backend envia o código por SMTP (`smtplib`; STARTTLS na porta 587
+  ou SSL na 465) usando uma conta dedicada ao Zelo e uma senha de aplicativo
+  (por exemplo, Gmail com verificação em duas etapas). As credenciais ficam
+  somente no `backend/.env` (`ZELO_SMTP_HOST`, `_USER`, `_PASSWORD`, `_PORT`,
+  `_SECURITY`, `_FROM`). Host, usuário e senha precisam vir juntos: uma
+  configuração parcial impede a inicialização. Sem SMTP, vale o comportamento
+  anterior (caixa local fora de produção; senão, entrega desativada).
+- Envio depois da resposta (`BackgroundTasks`): o SMTP leva segundos e, feito
+  dentro da requisição, a demora revelaria quais e-mails têm conta e anularia
+  a resposta uniforme de D028.
+- Falhas: o log registra apenas o canal e o tipo do erro, nunca o código, o
+  e-mail ou a senha. O cliente recebe a mesma resposta 202, então uma falha do
+  SMTP não é avisada à pessoa (aceito na demonstração).
+- Limitações conhecidas: a senha de aplicativo concede envio pela conta, por
+  isso a conta deve ser dedicada e a senha revogável; a mensagem sai de um
+  endereço do Gmail, sem domínio próprio (SPF/DKIM), e pode cair no spam; a
+  conta pessoal do Gmail tem limite diário de envio (valor atual PENDENTE de
+  consulta); **hospedagens bloqueiam portas SMTP de saída**: segundo a
+  pesquisa de 10/10/2026 (D044), o Railway no plano Hobby e o Render gratuito
+  bloqueiam, então este envio funciona no computador local e em hospedagem que
+  libere 587/465, mas não nesses planos.
+- Alternativa adiada: provedor transacional com domínio verificado (Resend,
+  Brevo, Amazon SES ou similar), necessário para uso real fora da Mostra.
+
+## D044 - Hospedagem com HTTPS
+
+- Estado: direção **aceita em 10/10/2026** pelo responsável (Google Cloud Run
+  para a API e Neon para o PostgreSQL). **Executada e pública em 31/10/2026**
+  (resultados em `docs/deployment.md`); no celular foram validados só login,
+  sessão e tela inicial (31/10/2026), os demais fluxos seguem PENDENTES
+- Condição do responsável: aceita cadastrar um cartão no Google Cloud desde que
+  não haja cobrança; por isso o procedimento usa franquias gratuitas, uma
+  instância no máximo, alerta de orçamento (que avisa, mas não bloqueia) e
+  instruções para apagar tudo. O e-mail de recuperação provavelmente será
+  dispensado na demonstração; se necessário, será tentado no Cloud Run (D043).
+- Consequências no código: o `Dockerfile` passa a respeitar a variável `PORT`
+  (padrão 8000); `backend/.gcloudignore` impede que `.env`, `.venv` e segredos
+  subam no envio do código-fonte; `backend/cloudrun.env.example.yaml` documenta
+  as variáveis (o arquivo preenchido é ignorado pelo Git).
+- Cloud Run e tarefas depois da resposta: com a cobrança por requisição (padrão),
+  a CPU é reduzida quando a resposta termina, e o envio de e-mail em segundo
+  plano (D043) pode não concluir; seria necessário `--no-cpu-throttling`
+  (cobrança por instância). Lido na documentação; não testado.
+- Franquias do build (consultadas em 10/10/2026): Cloud Build com 2.500
+  minutos gratuitos por mês e Artifact Registry com 0,5 GB gratuito (acima disso,
+  cerca de US$ 0,10 por GB-mês). O tamanho da imagem da API é PENDENTE.
+- Pergunta: hospedar na Vercel? Ela atende bem o build Web estático do app
+  (`flutter build web`), mas **não é adequada à API como está**, pelo que o
+  código exige:
+  - processo com estado em memória: limite de tentativas de login, limite local
+    da EcoMed e cache geográfico ficam por processo; em funções serverless cada
+    instância teria os seus, e o limite de login deixaria de valer de fato;
+  - o OCR traz `onnxruntime`, OpenCV e modelos PP-OCR (o `Dockerfile` baixa os
+    modelos no build) e o Tesseract em reserva usa pacote do sistema (`apt`);
+    o tamanho do pacote e a partida a frio são problemas prováveis em funções
+    (limites atuais da Vercel: PENDENTE de conferência);
+  - a API aplica as migrações do Alembic na partida e precisa de PostgreSQL,
+    que a Vercel não hospeda (exigiria Neon, Supabase ou similar).
+- Direção recomendada: hospedar o `backend/Dockerfile` existente em um serviço
+  de contêiner com PostgreSQL gerenciado (por exemplo Render, Railway, Fly.io
+  ou Google Cloud Run), com HTTPS automático. Critérios a conferir antes de
+  escolher, todos PENDENTES de verificação: memória suficiente para o OCR,
+  partida a frio aceitável na demonstração, saída SMTP liberada (D043), custo
+  e região.
+- Pesquisa de 10/10/2026 em páginas públicas e fóruns oficiais dos
+  provedores; **conferir nas páginas oficiais antes de contratar**, pois preços
+  e limites mudam (algumas fontes de terceiros divergem entre si):
+  - Railway: plano Hobby de US$ 5/mês com US$ 5 de uso incluído; memória
+    cobrada por uso (ordem de US$ 10 por GB-mês, segundo terceiros). Pelo
+    fórum oficial, a saída SMTP (465/587) só existe no plano Pro; no Hobby a
+    conexão ao Gmail dá tempo esgotado. Isso inviabiliza D043 nesse plano.
+  - Render: serviços gratuitos bloqueiam as portas SMTP 25, 465 e 587
+    (changelog de 16/09/2025), dormem após 15 minutos sem tráfego (cerca de 1
+    minuto para acordar) e o PostgreSQL gratuito expira em 30 dias.
+  - Fly.io: sem franquia gratuita para contas novas (teste de 2 horas ou 7
+    dias); Postgres gerenciado a partir de US$ 38/mês.
+  - Google Cloud Run: franquia mensal recorrente (2 milhões de requisições,
+    180 mil vCPU-s e 360 mil GiB-s na cobrança por requisição, camada 1 de
+    regiões), mas exige conta de faturamento. O Google diz não restringir as
+    portas 587/465 em VMs; o comportamento no Cloud Run **não foi confirmado**.
+  - Neon (PostgreSQL): plano gratuito com 0,5 GB e 100 CU-horas/mês por
+    projeto e suspensão após 5 minutos sem uso (a primeira consulta depois
+    disso demora mais). Um rastreador aponta mudança de termos em 15/01/2026.
+- Neon com este código: a conexão direta (não a `-pooler`) com
+  `postgresql+psycopg://` e `sslmode=require` e a aplicação das migrações na
+  partida **funcionaram em 31/10/2026**. O comportamento de `pool_pre_ping=True`
+  depois de uma suspensão do Neon (conexões encerradas) segue PENDENTE de
+  teste. A API escuta na porta 8000 (definir `PORT=8000` no Railway).
+- E-mail em hospedagem sem SMTP: usar a API HTTPS de um provedor transacional.
+  Resend exige domínio verificado para enviar a terceiros (sem domínio, só ao
+  e-mail da própria conta). Brevo tem plano gratuito de 300 e-mails/dia com
+  confirmação de remetente sem domínio, mas há relatos de entrega ruim ao
+  Gmail sem domínio autenticado (PENDENTE de teste). Exigiria um notificador
+  HTTP novo, ainda **não implementado**.
+- Memória medida em 10/10/2026 (Windows, memória do processo, imagens
+  sintéticas, uma rodada; em contêiner Linux os valores podem diferir): a API
+  importada ocupa cerca de 73 MB; com o OCR (RapidOCR) carregado, 200 a 330 MB
+  em repouso. O pico foi de 423 MB com imagem de 1280 × 960 e de 806 MB com
+  2400 × 1800 (o app normaliza fotos para 1600–2400 px de lado maior). Um plano
+  de 512 MB comporta a API, mas provavelmente não o OCR com fotos grandes;
+  reduzir o limite de 2400 px diminuiria o pico, mas exigiria reavaliar a
+  acurácia (PENDENTE).
+- Planos gratuitos (pesquisa de 10/10/2026, fontes de terceiros divergentes):
+  Render gratuito (sem cartão, 512 MB, dorme após 15 minutos); Google Cloud
+  Run (franquia recorrente, exige cartão, memória configurável, escala a
+  zero); Hugging Face Spaces com Docker e Koyeb deixaram de ser gratuitos sem
+  restrições em 2026 (HF marca Docker como pago; Koyeb pede cartão); Fly.io e
+  Railway não têm plano gratuito permanente. Para manter o limite de login
+  coerente em qualquer opção, limitar a uma instância.
+- Alternativa provisória: o acesso por Tailscale já usado nos testes em celular
+  (ver `docs/testing-plan.md`) funciona enquanto o computador estiver ligado.
+- A URL da API configurada no app e o `ZELO_CORS_ORIGIN_REGEX` precisarão ser ajustados ao
+  domínio escolhido.
+- Execução de 31/10/2026: a conta Google Cloud é de **teste gratuito** (crédito
+  de R$ 1.779,29 e 69 dias restantes no painel; o orçamento de R$ 5 foi criado
+  pelo responsável). Projeto `zelo-mostra-4f2a9c`, serviço `zelo-api` em
+  `us-central1` (2 GiB, 1 instância no máximo) e banco no Neon (us-east-2,
+  PostgreSQL 18). Imagem: o repositório do Artifact Registry ocupa 348,98 MB,
+  dentro dos 0,5 GB gratuitos. A leitura de embalagem rodou na nuvem com 4 fotos
+  sintéticas de 1290 × 915 px (200 nas 4); a hipótese de 2 GiB para o pico de
+  fotos de 2400 × 1800 px **não foi testada** na nuvem.
+- API pública (31/10/2026): o responsável executou o comando de
+  `docs/deployment.md` (`allUsers` com `roles/run.invoker`), necessário porque o
+  app no celular não envia credenciais do Google. A ferramenta de permissões do
+  Claude Code havia recusado a ação por expor a API à internet, então a decisão
+  e a execução foram dele. Medições da nuvem pública e uma falha transitória de
+  401 logo após a abertura estão em `docs/deployment.md`.
+- Ao sair do teste gratuito, os serviços param até que o responsável faça o
+  "upgrade" da conta; isso é aceitável para a Mostra, mas deve ser lembrado.
+- Partida a frio (31/10/2026, **aceita** pelo responsável com "pode ser sua
+  recomendação"): a primeira chamada do app no celular, depois de mais de uma
+  hora parado, levou 12,19 s (uma medição) contra um tempo limite de 15 s.
+  Decisão: o cliente de rede usa 40 s até a primeira resposta do servidor e 15 s
+  depois (`ZeloApiClient.firstRequestTimeout`), e a API é aquecida antes das
+  apresentações. Alternativas descartadas por ora: manter uma instância sempre
+  ligada (`--min-instances 1`, consumiria o crédito do teste gratuito; custo não
+  calculado) e reduzir o tempo das migrações da partida (a causa do tempo delas
+  não foi separada). O limite maior não diminui a espera, só evita o erro.
+- Reverificação de 10/11/2026: terceira medição de partida a frio, 14,94 s
+  (`/health`, mais de 9 dias parado), muito perto do limite antigo de 15 s e bem
+  dentro dos 40 s adotados; intervalo observado de 6,6 s a 14,9 s.
+- EcoMed a partir da nuvem (10/11/2026): a API no Cloud Run consultou a EcoMed e
+  retornou 30 pontos em Porto Alegre e em Cachoeirinha, sem liberação de IP
+  (por script; no celular, PENDENTE). **Risco:** o Cloud Run não tem IP de saída
+  fixo; se a EcoMed passar a exigir lista de IPs permitidos, a consulta deixa de
+  funcionar na nuvem até configurar IP fixo (VPC, Cloud NAT e IP reservado),
+  procedimento **planejado e não testado** em `docs/deployment.md`. Não existe um
+  IP único do backend para informar a terceiros; o IP do computador de
+  desenvolvimento não vale para a nuvem. Recomendação: não ativar a restrição
+  antes da Mostra; se for obrigatória, configurar o IP fixo e testar antes.
+- URL da API fora do repositório (10/11/2026, decisão do assistente por
+  precaução, **reversível**): o repositório é público e a API, aberta ao público
+  e sem limite de uso além do login; por isso a documentação usa `<URL_DA_API>` e
+  indica o comando `gcloud run services describe` para obtê-la. O endereço
+  continua embutido no APK, que não é versionado.

@@ -238,10 +238,11 @@ Medição pela API em Docker, mesmo interpretador para os dois motores:
 
 - No modo demonstração, medicamentos e descartes ficam somente em memória e a
   sessão é simulada. A persistência real exige o modo conectado com a API.
-- O APK de debug é gerado desde 03/10/2026, mas nada foi validado em
-  dispositivo ou emulador: splash, transição nativa, permissão de
-  localização, câmera e galeria, armazenamento seguro e intents de mapa e
-  telefone seguem PENDENTES.
+- O APK de debug é gerado desde 03/10/2026. Em 31/10/2026 ele foi instalado em
+  um Galaxy A12 (Android 13): abertura, tela de login, login com a API na
+  nuvem e tela inicial com os medicamentos funcionaram. Permissão de
+  localização, câmera e galeria, armazenamento seguro, intents de mapa e
+  telefone, avisos de validade e os demais fluxos seguem PENDENTES.
 - A EcoMed não fornece horários (lista sem `schedules`, detalhe vazio), e a
   maioria dos pontos fora de Porto Alegre não é LogMed; a confirmação por
   telefone continua necessária. As medições de 03/10/2026 são de uma única
@@ -249,8 +250,32 @@ Medição pela API em Docker, mesmo interpretador para os dois motores:
 - A leitura da embalagem foi medida apenas com embalagens sintéticas (ver o
   comparativo de motores); com fotos reais há só o relato qualitativo de que o
   Tesseract ia mal. Depende do servidor e não funciona no modo demonstração.
-- A recuperação de senha não envia e-mail: falta definir um provedor.
-- O backend roda apenas localmente, sem HTTPS público.
+- A recuperação de senha envia e-mail por SMTP apenas se a conta estiver
+  configurada (D043); o envio real ainda não foi observado e, com Gmail, a
+  mensagem pode cair no spam.
+- O backend foi publicado em 31/10/2026 no Cloud Run + Neon e aberto ao
+  público no mesmo dia. As medições são de uma rodada a partir do computador:
+  `/health` 0,36–1,27 s, login 0,78–0,95 s, medicamentos 0,37 s, 20 chamadas
+  autenticadas com mediana de 0,34 s e leitura de 4 fotos sintéticas de
+  1290 × 915 px em 5,21–5,64 s (13,96 s a primeira, que carrega o motor).
+  Uma chamada logo após a abertura recebeu 401 do portão do Google (hipótese:
+  propagação do IAM, não provada). No celular (Galaxy A12, Android 13), depois
+  de mais de uma hora sem tráfego, a primeira chamada do app levou 12,19 s
+  (partida a frio) e, cerca de 19 min depois da última chamada, 6,59 s (**duas**
+  medições, sem explicação separada para a diferença); as chamadas seguintes
+  levaram 0,1–0,5 s. O tempo limite do app era de 15 s e passou a 40 s na
+  primeira chamada. No build de debug o Android levou cerca de 9 s para
+  desenhar a primeira tela. Em 10/11/2026, depois de mais de 9 dias sem tráfego,
+  `/health` levou 14,94 s a partir do computador (**terceira** medição de
+  partida a frio; intervalo de 6,6 s a 14,9 s). Memória com foto de
+  2400 × 1800 px e a maior parte dos fluxos no celular seguem PENDENTES. A conta
+  Google é de teste gratuito (69 dias restantes em 31/10/2026).
+- A consulta de pontos da EcoMed pela API na nuvem foi verificada em 10/11/2026
+  por script, com a conta demo: 30 pontos em Porto Alegre (1,92 s com cache frio,
+  0,32 s com cache quente) e 30 em Cachoeirinha (1,03 s e 0,36 s), uma rodada,
+  sem liberação de IP. O Cloud Run não tem IP de saída fixo; se a EcoMed passar
+  a exigir lista de IPs, essa consulta deixa de funcionar na nuvem. A tela de
+  pontos e a localização no celular não foram testadas.
 - Termos de uso e política de privacidade permanecem PENDENTES de conteúdo e
   aprovação.
 - Não existem resultados de usabilidade coletados.

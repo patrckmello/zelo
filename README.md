@@ -21,8 +21,11 @@ per-user medications, disposal history, assisted package reading (server-side
 Tesseract OCR, always confirmed by the user) and an EcoMed client that keeps
 the API key on the server and was checked against live responses. The app runs
 either in a local demo mode (simulated session, in-memory data) or connected
-to the API. Android device validation and usability evaluation remain
-pending.
+to the API. The API is deployed on Google Cloud Run with Neon PostgreSQL, and
+a debug APK was installed on one Android phone (Galaxy A12), where login,
+session restore and the home screen were checked against it. Validation of the
+remaining flows on the device (camera, location, disposal, reminders) and the
+usability evaluation remain pending.
 
 ## Estado atual
 
@@ -49,14 +52,31 @@ pending.
   - abertura com nome e slogan, onboarding com cenas animadas e celebrações
     no cadastro (carimbo de validade) e no descarte (trajeto que varre a tela,
     inspirado no Strava).
-- **Validações executadas (03/10/2026):** 151 testes Flutter, 57 testes do
-  backend, lint, build Web nos dois modos, Docker Compose com PostgreSQL,
-  teste de contrato do app contra a API real, login e leitura de embalagem em
-  navegador real (Edge) e medição da EcoMed em 12 municípios da RMPA.
-- **Pendente:** validação em dispositivo Android (o APK de debug já é gerado), provedor de
-  e-mail para recuperação de senha, notificações de validade, avaliação da
-  leitura com fotos reais, textos jurídicos, reconciliação no Figma e
-  avaliação com participantes.
+- **Validações executadas (03/10/2026; reexecutadas em 10/11/2026):** em
+  10/11/2026, 153 testes Flutter, 71 testes do backend, `flutter analyze`,
+  formatação e `ruff`, todos sem falhas. Também executados em 03/10/2026: build
+  Web nos dois modos, Docker Compose com PostgreSQL, teste de contrato do app
+  contra a API real, login e leitura de embalagem em navegador real (Edge) e
+  medição da EcoMed em 12 municípios da RMPA.
+- **Nuvem e celular (31/10 e 10/11/2026):** a API roda no Cloud Run com
+  PostgreSQL no Neon, pública (D044, `docs/deployment.md`). O APK de debug foi
+  instalado em um Galaxy A12 e o login e a tela inicial funcionaram contra a
+  nuvem, e a sessão é restaurada ao reabrir. A partida a frio da API levou
+  12,19 s, 6,59 s e 14,94 s (três medições); o app espera até 40 s só na
+  primeira chamada, o que evita o erro mas **não** elimina a espera. Em
+  10/11/2026 a API na nuvem consultou a EcoMed (30 pontos em Porto Alegre e em
+  Cachoeirinha) sem liberação de IP, por script, não pelo celular.
+- **Pendente (não validado):** demais fluxos no celular (cadastro, câmera,
+  localização com pontos, descarte, histórico e avisos de validade); tempo de
+  abertura de um build de release; envio real do e-mail de recuperação (SMTP
+  implementado, falta configurar a conta, D043); memória com foto grande na
+  nuvem; avaliação da leitura com fotos reais; textos jurídicos; reconciliação
+  no Figma; avaliação com participantes.
+- **Risco conhecido:** o Cloud Run não tem IP de saída fixo. Se a EcoMed passar
+  a exigir lista de IPs permitidos, os pontos de coleta deixam de funcionar na
+  nuvem até configurar IP fixo (`docs/deployment.md`, não executado).
+- **Teste gratuito:** a nuvem usa crédito de teste gratuito do Google (prazo até
+  cerca de 08/01/2027); depois disso a API para, salvo mudança de plano.
 - **Fora do núcleo inicial:** mapa embutido.
 
 ## Como funciona
@@ -93,8 +113,9 @@ nenhuma consulta de pontos. Modo conectado: compile o app com
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.1, Alembic, Argon2, PyJWT,
   Pillow e OCR com RapidOCR (modelos PP-OCRv6, ONNX) e Tesseract 5 como
   reserva, na imagem Docker;
-- Dados: PostgreSQL 17;
-- Infraestrutura local: Docker Compose;
+- Dados: PostgreSQL 17 (Docker Compose local) e PostgreSQL 18 (Neon, na nuvem);
+- Infraestrutura: Docker Compose (local) e Google Cloud Run + Neon (nuvem,
+  D044);
 - Plataforma prioritária: Android.
 
 ## Estrutura
@@ -193,15 +214,18 @@ Também existem um teste de contrato opcional do app contra a API real
 
 ## Próximos passos
 
-1. Instalar o APK de debug num celular e validar splash, permissões de
-   localização, câmera/galeria, armazenamento seguro e abertura de mapas em
-   Android 12+ (ver `mobile/README.md`).
+1. No celular, já com o APK instalado e logado: validar cadastro, câmera/galeria,
+   permissão de localização, pontos de coleta, descarte e histórico, e abertura
+   de mapas em Android 12+ (ver `mobile/README.md`); medir um build de release.
 2. Validar os lembretes de validade (RF06, já implementados) num aparelho
    Android: aviso de teste, aviso agendado e reinício.
 3. Avaliar a leitura da embalagem com fotos reais e registrar acertos e
    correções.
-4. Definir provedor de e-mail para a recuperação de senha e hospedagem com
-   HTTPS.
+4. Configurar a conta SMTP dedicada em `backend/.env` e testar um envio real
+   (D043, opcional); medir a memória com foto grande na nuvem; decidir sobre IP
+   de saída fixo se a EcoMed exigir lista de IPs (`docs/deployment.md`, D044).
+   **Antes de apresentar:** aquecer a API uns 5 minutos antes (partida a frio de
+   6,6 s a 14,9 s) e manter a tela do celular ligada.
 5. Reconciliar as telas no Figma, aprovar os textos jurídicos e aplicar o
    protocolo de usabilidade.
 6. Decidir sobre lembretes de uso e reposição (D039) e leitura de receitas
